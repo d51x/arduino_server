@@ -12,6 +12,7 @@
 #include "const.h"
 #include "relay.h"
 #include "thermostat.h"
+#include "http.h"
 #include <SD.h>
 
 /* arduino.ru/forum/programmirovanie/zapis-i-chtenie-eeprom */
@@ -46,6 +47,8 @@ long lastReadingTime4 = 0;
 EthernetServer server(80);
 EthernetClient ethClient;
 PubSubClient mqtt_client(ethClient);
+
+//String HTTP_request;
 
 GlobalOptions options;
 
@@ -729,15 +732,6 @@ void uptime(const char* topic, long val) {
   free(sval);
 }
 
-void successHeader(EthernetClient *client){
-  client->println(F("HTTP/1.1 200 OK"));
-  client->println(F("Content-Type: text/html"));
-  client->println(F("<meta http-equiv='content-type' content='text/html; charset=UTF-8'>"));
-  client->println(F("Connnection: close"));
-          //client.println("Refresh: 5");  // refresh the page automatically every 5   
-          //client.println("<meta http-equiv='refresh' content='5'/>");
-  client->println();
-}
 
 void print_relays(EthernetClient *client, Relay *rel) {
   for (byte i=0;i<MAX_RELAY;i++) {
@@ -837,13 +831,7 @@ void generatePage(EthernetClient *client){
   //client->println(F("</html>"));
 }
 
-void redirectHeader(EthernetClient client, String path){
-  client.println(F("HTTP/1.1 302 Moved Temporarily"));
-  client.println(F("Content-Type: text/html"));
-  client.print(F("Location: ")); client.println(path);
-  client.println(F("Connnection: keep-alive"));
-  client.println();
-}
+
 
 void listenForEthernetClients() {
 	// listen for incoming clients
@@ -856,55 +844,62 @@ void listenForEthernetClients() {
 	
 	while (client.connected()) {
 		if (client.available()) {	
- 			char c = client.read();
+ 			char c = client.read(); // read 1 byte (character) from client
+			//HTTP_request += String(c);  // save the HTTP request 1 char at a time
+			// TODO: HTTP_request += String(c); // !!!!!!!!!!!!!!!
+			// last line of client request is blank and ends with \n
+			// respond to client only after last line received
 			if (c == '\n' && currentLineIsBlank) {
-				request = request.substring( request.indexOf(' ') + 1, request.lastIndexOf(' '));
+				request = getUrlFromHeader(&request);
 				WRITE_TO_SERIAL(F("Request: "), request, F(""), F(""));	
+				
 			  if(request=="/") {
 				successHeader(&client);
 				generatePage(&client);
 			  } else {
+				  
+				  
+				if ( request.startsWith("ajax_") ) {
+					// ajax request here
+					
+				} else {
+					// other pages or http get requests
+					String dev = getNextSlug(&request);	
+					String func = getNextSlug(&request);
+					String idx = getNextSlug(&request);
+					
+					// разбор get запросов вида /dev/func/idx для страниц
+					if ( dev.equals( HTTP_SLUG_RELAY ) ) {
+						if ( func.equals( HTTP_SLUG_STATE ) ) {
+							redirectHeader(&client, "/");
+						} else if (func.equals( HTTP_SLUG_STATUS )) {
+							relay[idx.toInt()].switch_relay( request.equals( CONST_ON ) ? OFF : ON);
+							relay[idx.toInt()].publish( &mqtt_client, options.device_name );
+							redirectHeader(client, "/");						
+						} else if (func.equals( HTTP_SLUG_SIGNAL )) {
+							redirectHeader(&client, "/");						
+						} else if (func.equals( HTTP_SLUG_FLASH )) {
+							redirectHeader(&client, "/");						
+						}
+					} else if ( dev.equals( HTTP_SLUG_THERM ) ) {
+						if ( func.equals( HTTP_SLUG_STATE ) ) {
+							thermostat[idx.toInt()].setState( request.equals( HTTP_SLUG_ON ) ? ENABLE : DISABLE, options.device_name);
+							redirectHeader(&client, "/");
+						} else if ( func.equals( HTTP_SLUG_MODE ) ) {
+							thermostat[idx.toInt()].setMode( request.equals( HTTP_SLUG_AUTO ) ? AUTO : MANUAL);
+							redirectHeader(&client, "/");
+						}					
+					} else if ( dev.equals( HTTP_SLUG_DSW ) ) {
+						if ( func.equals( HTTP_SLUG_STATE ) ) {
+							dsw_temp[idx.toInt()].setState( request.equals( HTTP_SLUG_ENABLE ) ? ENABLE : DISABLE);
+							redirectHeader(&client, "/");
+						}					
+					}						
+				}
 				// parse request
 				//   /relay/state/0/off
-				request.remove( 0, 1);
-				byte pos = request.indexOf('/');
-				String dev = request.substring(0, pos );
-				request.remove( 0, pos + 1);
-				pos = request.indexOf('/');
-				String func = request.substring(0, pos );
-				request.remove( 0, pos + 1);
-				pos = request.indexOf('/');
-				String idx = request.substring(0, pos );
-				request.remove( 0, pos + 1);
-				if ( dev.equals( F("relay") ) ) {
-					if ( func.equals(F("state")) ) {
-						//relay[idx.toInt()].setState( request.equals(F("off")) ? DISABLE : ENABLE);
-						redirectHeader(client, "/");
-					} else if (func.equals(F("status"))) {
-						relay[idx.toInt()].switch_relay( request.equals(F("off")) ? OFF : ON);
-						relay[idx.toInt()].publish(&mqtt_client, options.device_name);
-						redirectHeader(client, "/");						
-					} else if (func.equals(F("signal"))) {
-						//relay[idx.toInt()].setSignalType( request.equals(F("normal")) ? NORMAL : INVERT);
-						redirectHeader(client, "/");						
-					} else if (func.equals(F("flash"))) {
-						//relay[idx.toInt()].setFlash( request.equals(F("no")) ? false : true);
-						redirectHeader(client, "/");						
-					}
-				} else if ( dev.equals(F("therm")) ) {
-					if ( func.equals(F("state")) ) {
-						thermostat[idx.toInt()].setState( request.equals(F("off")) ? DISABLE : ENABLE, options.device_name);
-						redirectHeader(client, "/");
-					} else if ( func.equals(F("mode")) ) {
-						thermostat[idx.toInt()].setMode( request.equals(F("manual")) ? MANUAL : AUTO);
-						redirectHeader(client, "/");
-					}					
-				} else if ( dev.equals(F("dsw")) ) {
-					if ( func.equals(F("state")) ) {
-						dsw_temp[idx.toInt()].setState( request.equals(F("off")) ? DISABLE : ENABLE);
-						redirectHeader(client, "/");
-					}					
-				}					
+
+				
 			  }			  
 				break;
 			} else if (c == '\n') {
@@ -912,7 +907,7 @@ void listenForEthernetClients() {
 				currentLineIsBlank = true;
 				if ( !requestLineReceived ) { requestLineReceived = true; }          
 			} else if (c != '\r') {
-				if(!requestLineReceived) { request += c; }          
+				if(!requestLineReceived) { request += String(c); }          
 				// you've gotten a character on the current line
 				currentLineIsBlank = false;
 			}	 		
