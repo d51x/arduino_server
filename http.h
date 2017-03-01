@@ -38,7 +38,7 @@ const char HTTP_SLUG_AUTO[] PROGMEM = "auto";
 const char HTTP_SLUG_ON[] PROGMEM = "on";
 const char HTTP_SLUG_ENABLE[] PROGMEM = "enable";
 
-};	
+
 
 void successHeader(EthernetClient &client);
 void redirectHeader(EthernetClient &client, const char *path);
@@ -47,7 +47,7 @@ void redirectHeader(EthernetClient &client, const char *path);
 request - input url
 result - slug
 */
-String getUrlFromHeader(String &request);
+String getUrlFromHeader(String *request);
 String getNextSlug(String *request);
 
 

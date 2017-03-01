@@ -854,7 +854,7 @@ void listenForEthernetClients() {
 				WRITE_TO_SERIAL(F("Request: "), request, F(""), F(""));	
 				
 			  if(request=="/") {
-				successHeader(&client);
+				successHeader(client);
 				generatePage(&client);
 			  } else {
 				  
@@ -871,28 +871,28 @@ void listenForEthernetClients() {
 					// разбор get запросов вида /dev/func/idx для страниц
 					if ( dev.equals( HTTP_SLUG_RELAY ) ) {
 						if ( func.equals( HTTP_SLUG_STATE ) ) {
-							redirectHeader(&client, "/");
+							redirectHeader(client, "/");
 						} else if (func.equals( HTTP_SLUG_STATUS )) {
 							relay[idx.toInt()].switch_relay( request.equals( CONST_ON ) ? OFF : ON);
 							relay[idx.toInt()].publish( &mqtt_client, options.device_name );
 							redirectHeader(client, "/");						
 						} else if (func.equals( HTTP_SLUG_SIGNAL )) {
-							redirectHeader(&client, "/");						
+							redirectHeader(client, "/");						
 						} else if (func.equals( HTTP_SLUG_FLASH )) {
-							redirectHeader(&client, "/");						
+							redirectHeader(client, "/");						
 						}
 					} else if ( dev.equals( HTTP_SLUG_THERM ) ) {
 						if ( func.equals( HTTP_SLUG_STATE ) ) {
 							thermostat[idx.toInt()].setState( request.equals( HTTP_SLUG_ON ) ? ENABLE : DISABLE, options.device_name);
-							redirectHeader(&client, "/");
+							redirectHeader(client, "/");
 						} else if ( func.equals( HTTP_SLUG_MODE ) ) {
 							thermostat[idx.toInt()].setMode( request.equals( HTTP_SLUG_AUTO ) ? AUTO : MANUAL);
-							redirectHeader(&client, "/");
+							redirectHeader(client, "/");
 						}					
 					} else if ( dev.equals( HTTP_SLUG_DSW ) ) {
 						if ( func.equals( HTTP_SLUG_STATE ) ) {
 							dsw_temp[idx.toInt()].setState( request.equals( HTTP_SLUG_ENABLE ) ? ENABLE : DISABLE);
-							redirectHeader(&client, "/");
+							redirectHeader(client, "/");
 						}					
 					}						
 				}
