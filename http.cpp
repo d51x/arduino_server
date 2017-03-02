@@ -1,10 +1,10 @@
 #include "http.h"
 
-void successHeader(EthernetClient &client){
-  client.println(header_http_ok);
+void successHeader(EthernetClient client){
+  send(client, header_http_ok);
 }
 
-void redirectHeader(EthernetClient &client, const char *path){
+void redirectHeader(EthernetClient client, const char *path){
   client.println(F("HTTP/1.1 302 Moved Temporarily"));
   client.println(F("Content-Type: text/html"));
   client.print(F("Location: ")); client.println(path);
@@ -30,5 +30,9 @@ String getNextSlug(String *request) {
 	return res;
 }
 
-
+void send(EthernetClient client, const char *ptr)
+{
+  char c;
+  while(c=pgm_read_byte(ptr++)) client.print(c);
+}
 

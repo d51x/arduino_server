@@ -13,12 +13,14 @@
 #include "relay.h"
 #include "thermostat.h"
 #include "http.h"
-#include <SD.h>
+//#include <SD.h>
 
 /* arduino.ru/forum/programmirovanie/zapis-i-chtenie-eeprom */
 
-File webFile;
+//File webFile;
 
+extern int __bss_end;
+extern void *__brkval;
 
 #define RESET_EEPROM1
 
@@ -53,6 +55,17 @@ PubSubClient mqtt_client(ethClient);
 GlobalOptions options;
 
 void(* resetFunc) (void) = 0;
+
+int memoryFree()
+{
+   int freeValue;
+   if((int)__brkval == 0)
+      freeValue = ((int)&freeValue) - ((int)&__bss_end);
+   else
+      freeValue = ((int)&freeValue) - ((int)__brkval);
+   return freeValue;
+}
+
 
 void load_options() {
 #ifdef RESET_EEPROM
@@ -409,12 +422,12 @@ void setup() {
 #endif 
 
     // initialize SD card
-    Serial.println("Initializing SD card...");
+/*     Serial.println("Initializing SD card...");
     if (!SD.begin(4)) {
         Serial.println("ERROR - SD card initialization failed!");
         //return;    // init failed
     }
-
+ */
   delay(100);
   
   load_options();
@@ -499,6 +512,37 @@ void temperature_update() {
 #ifdef DEBUG1  
   WRITE_TO_SERIAL(F("-------- "), F("function temperature_update"), F(" end"), F(""));	
 #endif 	  
+}
+
+void free_memory_publish() {
+#ifdef DEBUG1  
+  WRITE_TO_SERIAL(F("-------- "), F("function free_memory_publish"), F(" start"), F(""));	
+#endif 	
+  int m = memoryFree();
+
+  byte i = strlen(options.device_name);
+  byte l = strlen(P_TOPIC_ARDUINO_MEMORY_FREE);
+  char* buffer = (char*)malloc( i + l+1+2 );
+  if ( buffer == NULL) return;
+  
+  strcpy(buffer, options.device_name);
+  strcat_P(buffer, (char*)P_TOPIC_ARDUINO_MEMORY_FREE);
+
+  char mm[5];
+  itoa(m, mm, 10);
+  mqtt_client.publish( buffer, mm);
+  
+  #ifdef DEBUG1 
+	WRITE_TO_SERIAL(F("MQTT topic: "), buffer, F(" value: "), mm);	
+  #endif 	
+
+  free(buffer);
+
+  
+#ifdef DEBUG1  
+  WRITE_TO_SERIAL(F("-------- "), F("function free_memory_publish"), F(" end"), F(""));	
+#endif 	 	
+	
 }
 
 void thermostat_sort_by_priority() {
@@ -734,102 +778,102 @@ void uptime(const char* topic, long val) {
 }
 
 
-void print_relays(EthernetClient *client, Relay *rel) {
+void print_relays(EthernetClient &client, Relay *rel) {
   for (byte i=0;i<MAX_RELAY;i++) {
-	client->print(F("<strong>Relay "));	 client->print(rel[i].index+1); client->print(F("</strong>"));  
-    client->print(F("<a href=\"/relay/state/"));  client->print(rel[i].index);	
-	client->print((rel[i].info.state == DISABLE) ?  F("/on\"><b> disable </b>") : F("/off\"><b> enable </b>"));
-	client->print(F("</a>"));
-	client->print(F("<span> Status </span>"));
-	client->print(F("<a href=\"/relay/status/"));  client->print(rel[i].index);	 	
-	client->print((rel[i].info.status == OFF) ?  F("/on\"><b>OFF</b>") : F("/off\"><b>ON</b>")); 
-	client->print(F("</a>"));
-    client->print(F("<span> Signal </span>"));
-	client->print(F("<a href=\"/relay/signal/"));  client->print(rel[i].index); 	
-	client->print((rel[i].info.signalType == NORMAL) ?  F("/invert\"><b>NORMAL</b>") : F("/normal\"><b>INVERT</b>")); 
-	client->print(F("</a>"));
-    client->print(F("<span> Flash </span>")); 
-	client->print(F("<a href=\"/relay/flash/"));  client->print(rel[i].index); 	
-	client->print((rel[i].info.to_flash == true) ?  F("/no\"><b>YES</b>") : F("/yes\"><b>NO</b>")); 
-	client->print(F("</a>"));
-	client->print(F("<span> Pin </span>")); 
-	client->print(rel[i].info.pin);
-	client->print(F("<br>"));
+	client.print(F("<strong>Relay "));	 client.print(rel[i].index+1); client.print(F("</strong>"));  
+    client.print(F("<a href=\"/relay/state/"));  client.print(rel[i].index);	
+	client.print((rel[i].info.state == DISABLE) ?  F("/on\"><b> disable </b>") : F("/off\"><b> enable </b>"));
+	client.print(F("</a>"));
+	client.print(F("<span> Status </span>"));
+	client.print(F("<a href=\"/relay/status/"));  client.print(rel[i].index);	 	
+	client.print((rel[i].info.status == OFF) ?  F("/on\"><b>OFF</b>") : F("/off\"><b>ON</b>")); 
+	client.print(F("</a>"));
+    client.print(F("<span> Signal </span>"));
+	client.print(F("<a href=\"/relay/signal/"));  client.print(rel[i].index); 	
+	client.print((rel[i].info.signalType == NORMAL) ?  F("/invert\"><b>NORMAL</b>") : F("/normal\"><b>INVERT</b>")); 
+	client.print(F("</a>"));
+    client.print(F("<span> Flash </span>")); 
+	client.print(F("<a href=\"/relay/flash/"));  client.print(rel[i].index); 	
+	client.print((rel[i].info.to_flash == true) ?  F("/no\"><b>YES</b>") : F("/yes\"><b>NO</b>")); 
+	client.print(F("</a>"));
+	client.print(F("<span> Pin </span>")); 
+	client.print(rel[i].info.pin);
+	client.print(F("<br>"));
   }
 
 }
 
-void print_temp(EthernetClient *client, DSW_Temp *temp) {
+void print_temp(EthernetClient &client, DSW_Temp *temp) {
   for (byte i=0;i<MAX_DSW_TEMPERATURE_SENSORS;i++) {
-	client->print(F("<strong>DSW "));	 client->print(i+1); client->print(F("</strong>"));  
-    client->print(F("<a href=\"/dsw/state/"));  client->print(i);	
-	client->print((temp[i].info.state == DISABLE) ?  F("/on\"><b> disable </b>") : F("/off\"><b> enable </b>"));
-	client->print(F("</a>"));
-    client->print(F("<span> Address </span>")); 
+	client.print(F("<strong>DSW "));	 client.print(i+1); client.print(F("</strong>"));  
+    client.print(F("<a href=\"/dsw/state/"));  client.print(i);	
+	client.print((temp[i].info.state == DISABLE) ?  F("/on\"><b> disable </b>") : F("/off\"><b> enable </b>"));
+	client.print(F("</a>"));
+    client.print(F("<span> Address </span>")); 
 ;
 	for (uint8_t j = 0; j < 8; j++)
 	{
-				client->print(F("0x"));
-				if (temp[i].info.address[j] < 0x10) client->print(F("0"));
-				client->print(temp[i].info.address[j], HEX);
-				if (j < 7) client->print(F(", "));
+				client.print(F("0x"));
+				if (temp[i].info.address[j] < 0x10) client.print(F("0"));
+				client.print(temp[i].info.address[j], HEX);
+				if (j < 7) client.print(F(", "));
 	}	
-    client->print(F("<span> Temp </span>")); 
-	client->print(temp[i].value);
-	client->print(F("<br>"));
+    client.print(F("<span> Temp </span>")); 
+	client.print(temp[i].value);
+	client.print(F("<br>"));
   }
 }
 
-void print_thermostat(EthernetClient *client, Thermostat *therm) {
+void print_thermostat(EthernetClient &client, Thermostat *therm) {
   for (byte i=0;i<options.therms_count;i++) {
-	client->print(F("<strong>Thermostat "));	 client->print(therm[i].index+1); client->print(F("</strong>"));  
-    client->print(F("<a href=\"/therm/state/"));  client->print(therm[i].index);	
-	client->print((therm[i].info.state == DISABLE) ?  F("/on\"><b> disable </b>") : F("/off\"><b> enable </b>"));
-	client->print(F("</a>"));
-	client->print(F("<span> Status </span>"));	
-	client->print((therm[i].info.status == OFF) ?  F("<b>OFF</b>") : F("<b>ON</b>")); 
-    client->print(F("<span> Priority </span>")); 
-	client->print(therm[i].info.priority);
+	client.print(F("<strong>Thermostat "));	 client.print(therm[i].index+1); client.print(F("</strong>"));  
+    client.print(F("<a href=\"/therm/state/"));  client.print(therm[i].index);	
+	client.print((therm[i].info.state == DISABLE) ?  F("/on\"><b> disable </b>") : F("/off\"><b> enable </b>"));
+	client.print(F("</a>"));
+	client.print(F("<span> Status </span>"));	
+	client.print((therm[i].info.status == OFF) ?  F("<b>OFF</b>") : F("<b>ON</b>")); 
+    client.print(F("<span> Priority </span>")); 
+	client.print(therm[i].info.priority);
 	
-    client->print(F("<span> Mode </span>")); 
-	client->print(F("<a href=\"/therm/mode/"));  client->print(therm[i].index); 	
-	client->print((therm[i].info.mode == AUTO) ?  F("/manual\"><b>AUTO</b>") : F("/auto\"><b>MANUAL</b>")); 
-	client->print(F("</a>"));
-/*     client->print(F("<span> Relay </span>")); 
-	client->print(therm[i].relay->idx);
-	client->print(F("<span> Sensor </span>")); 
-	client->print(therm[i].tempSensor->value);
-    client->print(F("<span> Address </span>")); 
+    client.print(F("<span> Mode </span>")); 
+	client.print(F("<a href=\"/therm/mode/"));  client.print(therm[i].index); 	
+	client.print((therm[i].info.mode == AUTO) ?  F("/manual\"><b>AUTO</b>") : F("/auto\"><b>MANUAL</b>")); 
+	client.print(F("</a>"));
+/*     client.print(F("<span> Relay </span>")); 
+	client.print(therm[i].relay->idx);
+	client.print(F("<span> Sensor </span>")); 
+	client.print(therm[i].tempSensor->value);
+    client.print(F("<span> Address </span>")); 
 	char tmp[8] = "";
 	for (uint8_t j = 0; j < 8; j++)
 	{
-				client->print(F("0x"));
-				if (therm[i].tempSensor->addr[j] < 0x10) client->print(F("0"));
-				client->print(therm[i].tempSensor->addr[j], HEX);
-				if (j < 7) client->print(F(", "));
+				client.print(F("0x"));
+				if (therm[i].tempSensor->addr[j] < 0x10) client.print(F("0"));
+				client.print(therm[i].tempSensor->addr[j], HEX);
+				if (j < 7) client.print(F(", "));
 	} */	
-	client->print(F("<br>"));
+	client.print(F("<br>"));
   }
 }
 
-void generatePage(EthernetClient *client){
-  //client->println(F("<!DOCTYPE HTML>"));
-  //client->println(F("<html>"));
-  //client->println(F("<head>"));
-  //client->println(F("<title>Server</title>"));
-  //client->println(F("</head>"));
+void generatePage(EthernetClient client){
+  //client.println(F("<!DOCTYPE HTML>"));
+  //client.println(F("<html>"));
+  //client.println(F("<head>"));
+  //client.println(F("<title>Server</title>"));
+  //client.println(F("</head>"));
 
-  //client->println(F("<body>"));
+  //client.println(F("<body>"));
 
-	client->print(F("<h2>")); client->print(options.device_name); client->print(F("</h2>"));
+	client.print(F("<h2>")); client.print(options.device_name); client.print(F("</h2>"));
   //print_relay01_info(client);
-  print_relays(client, relay);  client->println(F("<br>"));
-  print_temp(client, dsw_temp);  client->println(F("<br>"));
+  print_relays(client, relay);  client.println(F("<br>"));
+  print_temp(client, dsw_temp);  client.println(F("<br>"));
   print_thermostat(client, thermostat); 
   
-  client->println(F("<br>"));
-  //client->println(F("</body>"));
-  //client->println(F("</html>"));
+  client.println(F("<br>"));
+  //client.println(F("</body>"));
+  //client.println(F("</html>"));
 }
 
 
@@ -856,7 +900,7 @@ void listenForEthernetClients() {
 				
 			  if(request=="/") {
 				successHeader(client);
-				generatePage(&client);
+				generatePage(client);
 			  } else {
 				  
 				  
@@ -928,7 +972,8 @@ void loop() {
   if ((millis() - lastReadingTime2) > (options.temperature_refresh * 1000)) {
     lastReadingTime2 = millis();
     temperature_update();
-	
+	free_memory_publish();
+	//WRITE_TO_SERIAL(F("FreeMem: "), memoryFree(), F(""), F(""));	
   }
 
   if ((millis() - lastReadingTime3) > (options.thermostat_refresh * 1000)) {

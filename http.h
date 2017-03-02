@@ -4,26 +4,20 @@
 #include <Ethernet.h>
 #include <avr/pgmspace.h>
 
-const char PROGMEM header_http_ok[]={\
+const char PROGMEM header_http_ok[]=
 	"HTTP/1.1 200 OK\r\n"\
 	"Content-Type: text/html\r\n"\
 	"<meta http-equiv='content-type' content='text/html; charset=UTF-8'>\r\n"\
 	"Connection: keep-alive\r\n"\
-	"\r\n\0"\
-};
+	"\r\n";
 
-const char http_Found[] PROGMEM = {\
-    "HTTP/1.0 302 Found\r\n"\
+const char http_Found[] PROGMEM = "HTTP/1.0 302 Found\r\n"\
     "Location: %s/\r\n"\
-		"Connnection: keep-alive\r\n"\
-		"\0"\
-};
+		"Connnection: keep-alive\r\n";
 
-const char http_Unauthorized[] PROGMEM = {\
-    "HTTP/1.0 401 Unauthorized\r\n"\
+const char http_Unauthorized[] PROGMEM = "HTTP/1.0 401 Unauthorized\r\n"\
     "Content-Type: text/html\r\n\r\n"\
-    "<h1>401 Unauthorized</h1>\0"\
-};	
+    "<h1>401 Unauthorized</h1>";	
 
 const char HTTP_SLUG_RELAY[] PROGMEM = "relay";
 const char HTTP_SLUG_THERM[] PROGMEM = "therm";
@@ -40,8 +34,9 @@ const char HTTP_SLUG_ENABLE[] PROGMEM = "enable";
 
 
 
-void successHeader(EthernetClient &client);
-void redirectHeader(EthernetClient &client, const char *path);
+void successHeader(EthernetClient client);
+void redirectHeader(EthernetClient client, const char *path);
+void send(EthernetClient client, const char *ptr);
 
 /*
 request - input url

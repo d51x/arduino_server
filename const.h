@@ -63,5 +63,6 @@ const char P_THERM_MODE_STATE[] PROGMEM         = "/therm/mode/state/";
 const char P_TOPIC_ARDUINO_RESTART[] PROGMEM           = "/restart";
 const char P_TOPIC_ARDUINO_RESET[] PROGMEM           = "/reset";
 const char P_TOPIC_ARDUINO_UPTIME[] PROGMEM           = "/uptime";
+const char P_TOPIC_ARDUINO_MEMORY_FREE[] PROGMEM           = "/memoryfree";
 
 #endif //CONST_H
