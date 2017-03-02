@@ -30,6 +30,8 @@ struct GlobalOptions {
   byte therms_count;
   byte asc_count;
   byte i2c_count;
+	byte pin_i2c_sda;
+	byte pin_i2c_scl;
 };
 
 #endif //TYPES_H

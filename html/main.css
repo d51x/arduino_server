@@ -24,3 +24,16 @@ body {
 a:link{color:#666;}
 a:visited{color:#666;}
 .warn{color:#F00;line-height:35px;}
+
+.gnrlopt{float: left;}
+.gnrlopt > div {float: left; display: block; width: 50%;}
+.gnrlopt span {text-align: right; display: inline-block; }
+
+.pinscfg{float: left;}
+.pinscfg > div {float: left;}
+.rl{float: left; display: block;}
+.rl span {display: block;}
+.dswcfg {}
+.dsw{}
+.relcfg {}
+.rel{}

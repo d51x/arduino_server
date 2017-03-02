@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>$device_name</title>
-<meta http-equiv="REFRESH" content="60">
+<!--<meta http-equiv="REFRESH" content="60">-->
 <meta name="viewport" content="width=640">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="main.css">
@@ -34,20 +34,72 @@
 	</div>
 </div>
 <div class="c2">
-
-	<br>
-
-	<br>
-
+	<form method="GET">
+		<div class="gnrlopt">
+				<div>
+					<span>Device name:</span> <input size="5" name="pdvn" value="arduino"  required><br>
+					<span>Device ip:</span> <input size="10" name="pdip" value="192.168.1.177"  required><br>
+					<span>Device mac:</span> <input size="15" name="pdmac" value="DE:AD:BE:EF:FE:ED"  required><br>
+					<span>Mqtt ip:</span> <input size="10" name="mqip" value="192.168.1.45"  required><br>
+				</div>
+				<div>			
+					<span>First Start Relay Timeout:</span> <input style="width: 3em;" type="number" name="fsrt" value="1"  min="1" max="60" required><span>sec</span><br>
+					<span>Temperature refresh time:</span><input style="width: 3em;" type="number" name="tmpt" value="30"  min="1" max="600" required><span>sec</span><br>
+					<span>Thermostat refresh time:</span><input style="width: 3em;" type="number" name="thrt" value="30"  min="10" max="600" required><span>sec</span><br>
+					<span>Thermostats Max Power:</span> <input type="number" name="mxpwr" value="3500" min="0" max="16000" step="100" style="width: 4em;" required><span>watt</span><br>
+					<span>Thermostats count:</span> <input style="width: 3em;" type="number" name="thrmcnt" value="16" min="0" max="16" required><br>
+				</div>
+				<div>
+					<span>DSW count:</span> <input style="width: 3em;" type="number" name="dswcnt" value="10"  min="0" max="16" required><br>
+					<span>Relays count:</span> <input style="width: 3em;" type="number" name="rlcnt" value="16"  min="0" max="16" required><br>
+					
+				</div>
+				<div>
+					<span style="display: none;">ASC (current sens) count:</span> <input style="display: none;" style="width: 3em;" type="number"  name="asccnt" value="6"  min="0" max="16"  required><br>
+					<span style="display: none;">I2C devices count:</span> <input style="display: none;" style="width: 3em;" type="number"  name="i2ccnt" value="8"  min="0" max="8" required><br>
+				</div>	
+		</div>
+		<div class="pinscfg">	
+			<h4>Pins configuration:</h4>
+			<div>
+				<span>OneWire pin:</span> <input style="width: 3em;" name="1wpin" value="8"  type="number" min="2" max="54" required>
+				<span>Ethernet pin:</span> <input style="width: 3em;" name="ethpin" value="10"  type="number" min="2" max="54" required>
+				<span>I2C SDA pin:</span> <input style="width: 3em;" name="i2csdapin" value="2"  type="number" min="2" max="54" required>
+				<span>I2C SCL pin:</span> <input style="width: 3em;" name="i2csclpin" value="0"  type="number" min="2" max="54" required>
+			</div>
+			<div>
+				<span>Relay pins:</span><br>
+				<div class="rl"><span>R01</span> <input style="width: 3em;" name="rlpin1" type="number" min="2" max="54" value="2">		</div>
+				<div class="rl"><span>R02</span> <input style="width: 3em;" name="rlpin2" type="number" min="2" max="54" value="3">  </div>
+				<div class="rl"><span>R03</span> <input style="width: 3em;" name="rlpin3" type="number" min="2" max="54" value="5">  </div>
+				<div class="rl"><span>R04</span> <input style="width: 3em;" name="rlpin4" type="number" min="2" max="54" value="6">  </div>
+				<div class="rl"><span>R05</span> <input style="width: 3em;" name="rlpin5" type="number" min="2" max="54" value="7">  </div>
+				<div class="rl"><span>R06</span> <input style="width: 3em;" name="rlpin6" type="number" min="2" max="54" value="8">  </div>
+				<div class="rl"><span>R07</span> <input style="width: 3em;" name="rlpin7" type="number" min="2" max="54" value="9">  </div>
+				<div class="rl"><span>R08</span> <input style="width: 3em;" name="rlpin8" type="number" min="2" max="54" value="22"> </div>
+				<div class="rl"><span>R09</span> <input style="width: 3em;" name="rlpin9" type="number" min="2" max="54" value="23"> </div>
+				<div class="rl"><span>R10</span> <input style="width: 3em;" name="rlpin10" type="number" min="2" max="54" value="24"></div>
+				<div class="rl"><span>R11</span> <input style="width: 3em;" name="rlpin11" type="number" min="2" max="54" value="25"></div>
+				<div class="rl"><span>R12</span> <input style="width: 3em;" name="rlpin12" type="number" min="2" max="54" value="26"></div>
+				<div class="rl"><span>R13</span> <input style="width: 3em;" name="rlpin13" type="number" min="2" max="54" value="27"></div>
+				<div class="rl"><span>R14</span> <input style="width: 3em;" name="rlpin14" type="number" min="2" max="54" value="28"></div>
+				<div class="rl"><span>R15</span> <input style="width: 3em;" name="rlpin15" type="number" min="2" max="54" value="29"></div>
+				<div class="rl"><span>R16</span> <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30"></div>
+			</div>
+		</div>
+		<input type="hidden" name="st" value="1">
+		<br>
+		<input type="submit" value="Save"> 
+	</form>
 	<br>
 	
 	<div class="h" style="background:#808080">Config:</div>
 	<div class="c">
-		<a href="configmain">Main</a> 
-		<a href="configall">Options</a> 
-		<a href="configsrv">OneWire</a> 
-		<a href="configpio">Relays</a> 
-		<a href="config1wire">Thermostats</a> 
+		<a href="index.html">Main</a> 
+		<a href="options.html">Options</a> 
+		<a href="onewire.html">OneWire</a> 
+		<a href="relays.html">Relays</a> 
+		<a href="therms.html">Thermostats</a> 
 	</div>
 </div>
 </body>

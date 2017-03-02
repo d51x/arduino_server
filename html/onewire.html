@@ -34,20 +34,42 @@
 	</div>
 </div>
 <div class="c2">
+	<form method="GET">
 
-	<br>
-
-	<br>
-
+		<div class="dswcfg">	
+			<h4>OneWire temperature sensors configuration:</h4>
+			<div>
+				<span>OneWire pin:</span> <input style="width: 3em;" name="1wpin" value="8"  type="number" min="2" max="54" required>
+				<span>DSW count:</span> <input style="width: 3em;" type="number" name="dswcnt" value="10"  min="0" max="16" required>
+				<span>Temperature refresh time:</span><input style="width: 3em;" type="number" name="tmpt" value="30"  min="1" max="600" required><span>sec</span>
+			</div>
+			<div>
+				<span>Temperature sensors:</span><br>
+				<div class="dsw"><span>DSW01</span> <input name="dswe1" type="checkbox" checked> <span>Title:</span><input name="dswn1" type="input" > <span>Value:</span>24.8 °C		</div>
+				<div class="dsw"><span>DSW02</span> <input name="dswe2" type="checkbox" checked> <span>Title:</span><input name="dswn2" type="input" > <span>Value:</span>25.2 °C </div>
+				<div class="dsw"><span>DSW03</span> <input name="dswe3" type="checkbox" checked> <span>Title:</span><input name="dswn3" type="input" > <span>Value:</span>21.8 °C </div>
+				<div class="dsw"><span>DSW04</span> <input name="dswe4" type="checkbox" checked> <span>Title:</span><input name="dswn4" type="input" > <span>Value:</span>24.3 °C </div>
+				<div class="dsw"><span>DSW05</span> <input name="dswe5" type="checkbox" checked> <span>Title:</span><input name="dswn5" type="input" > <span>Value:</span>25.4 °C </div>
+				<div class="dsw"><span>DSW06</span> <input name="dswe6" type="checkbox" checked> <span>Title:</span><input name="dswn6" type="input" > <span>Value:</span>27.2 °C </div>
+				<div class="dsw"><span>DSW07</span> <input name="dswe7" type="checkbox" checked> <span>Title:</span><input name="dswn7" type="input" > <span>Value:</span>19.0 °C </div>
+				<div class="dsw"><span>DSW08</span> <input name="dswe8" type="checkbox" checked> <span>Title:</span><input name="dswn8" type="input" > <span>Value:</span>-13.4 °C</div>
+				<div class="dsw"><span>DSW09</span> <input name="dswe9" type="checkbox" checked> <span>Title:</span><input name="dswn9" type="input" > <span>Value:</span>--- °C</div>
+				<div class="dsw"><span>DSW10</span> <input name="dswe10" type="checkbox" checked> <span>Title:</span><input name="dswn10" type="input" > <span>Value:</span>--- °C</div>
+			</div>
+		</div>
+		<input type="hidden" name="st" value="1">
+		<br>
+		<input type="submit" value="Save"> 
+	</form>
 	<br>
 	
 	<div class="h" style="background:#808080">Config:</div>
 	<div class="c">
-		<a href="configmain">Main</a> 
-		<a href="configall">Options</a> 
-		<a href="configsrv">OneWire</a> 
-		<a href="configpio">Relays</a> 
-		<a href="config1wire">Thermostats</a> 
+		<a href="index.html">Main</a> 
+		<a href="options.html">Options</a> 
+		<a href="onewire.html">OneWire</a> 
+		<a href="relays.html">Relays</a> 
+		<a href="therms.html">Thermostats</a> 
 	</div>
 </div>
 </body>

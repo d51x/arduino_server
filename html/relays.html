@@ -35,19 +35,66 @@
 </div>
 <div class="c2">
 
-	<br>
+	<form method="GET">
 
-	<br>
-
-	<br>
+		<div class="relcfg">	
+			<h4>Relays configuration:</h4>
+			<div>
+			<span>Relays count:</span> <input style="width: 3em;" type="number" name="rlcnt" value="16"  min="0" max="16" required>
+			</div>
+			<div>
+				<span>Relays:</span><br>
+				<hr>
+				<div class="rel">
+					<b>01: </b> 
+					<input name="rele1" type="checkbox" checked> <span>ENABLE</span>  
+					<input name="relstt1" type="checkbox" ><span>OFF</span>
+					<input name="relsig1" type="checkbox" checked><span>INVERT</span>
+					<input name="relfls1" type="checkbox" checked><span>flash</span>
+					<br>
+					Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30"><span>Title:</span>
+					<input name="reln1" type="input" >			
+					</div>
+				<hr>
+				<div class="rel">
+					<b>02: </b> Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30">
+					<span>Title:</span><input name="reln2" type="input" >
+					<br> 
+					<input name="rele2" type="checkbox" checked> <span>ENABLE</span> 
+					<input name="relstt2" type="checkbox" checked><span>ON</span>
+					<input name="relsig2" type="checkbox" checked><span>INVERT</span>
+					<input name="relfls1" type="checkbox" ><span>non flash</span>
+				</div>
+				<hr>
+				<div class="rel">
+					<b>03: </b> <input name="rele3" type="checkbox" checked> <span>ENABLE</span> 
+					Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30">
+					<input name="relstt3" type="checkbox" checked><span>ON</span>
+					<input name="relsig3" type="checkbox" checked><span>INVERT</span>
+					<input name="relfls1" type="checkbox" checked><span>flash</span>					
+					<br> 
+					<span>Title:</span><input name="reln3" type="input" >
+				</div>
+				<hr><div class="rel"><b>04: </b> <input name="rele4" type="checkbox" > <span>DISABLE</span> Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30"><span>Title:</span><input name="reln4" type="input" ><br> <input name="relstt4" type="checkbox" ><span>OFF</span><input name="relsig4" type="checkbox" ><span>NORMAL</span><input name="relfls1" type="checkbox" checked><span>flash</span></div>
+				<hr><div class="rel"><b>05: </b> <input name="rele5" type="checkbox" checked> <span>ENABLE</span> Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30"><span>Title:</span><input name="reln5" type="input" ><br> <input name="relstt5" type="checkbox" ><span>OFF</span><input name="relsig5" type="checkbox" checked><span>INVERT</span><input name="relfls1" type="checkbox" checked><span>flash</span></div>
+				<hr><div class="rel"><b>06: </b> <input name="rele6" type="checkbox" > <span>DISABLE</span> Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30"><span>Title:</span><input name="reln6" type="input" ><br> <input name="relstt6" type="checkbox" checked><span>ON</span><input name="relsig6" type="checkbox" checked><span>INVERT</span><input name="relfls1" type="checkbox" ><span>non flash</span></div>
+				<hr><div class="rel"><b>07: </b> <input name="rele7" type="checkbox" checked> <span>ENABLE</span> Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30"><span>Title:</span><input name="reln7" type="input" ><br> <input name="relstt7" type="checkbox" ><span>OFF</span><input name="relsig7" type="checkbox" ><span>NORMAL</span><input name="relfls1" type="checkbox" checked><span>flash</span></div>
+				<hr><div class="rel"><b>08: </b> <input name="rele8" type="checkbox" > <span>DISABLE</span> Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30"><span>Title:</span><input name="reln8" type="input" ><br> <input name="relstt8" type="checkbox" checked><span>ON</span><input name="relsig8" type="checkbox" checked><span>INVERT</span><input name="relfls1" type="checkbox" checked><span>flash</span></div>
+				<hr><div class="rel"><b>09: </b> <input name="rele9" type="checkbox" checked> <span>ENABLE</span> Pin: <input style="width: 3em;" name="rlpin16" type="number" min="2" max="54" value="30"><span>Title:</span><input name="reln9" type="input" ><br> <input name="relstt9" type="checkbox" checked><span>ON</span><input name="relsig9" type="checkbox" checked><span>INVERT</span><input name="relfls1" type="checkbox" ><span>non flash</span></div>
+			</div>
+		</div>
+		<input type="hidden" name="st" value="1">
+		<br>
+		<input type="submit" value="Save"> 
+	</form>
 	
 	<div class="h" style="background:#808080">Config:</div>
 	<div class="c">
-		<a href="configmain">Main</a> 
-		<a href="configall">Options</a> 
-		<a href="configsrv">OneWire</a> 
-		<a href="configpio">Relays</a> 
-		<a href="config1wire">Thermostats</a> 
+		<a href="index.html">Main</a> 
+		<a href="options.html">Options</a> 
+		<a href="onewire.html">OneWire</a> 
+		<a href="relays.html">Relays</a> 
+		<a href="therms.html">Thermostats</a> 
 	</div>
 </div>
 </body>

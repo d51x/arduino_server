@@ -34,20 +34,63 @@
 	</div>
 </div>
 <div class="c2">
+	<form method="GET">
 
-	<br>
-
-	<br>
-
-	<br>
+		<div class="relcfg">	
+			<h4>Thermostats configuration:</h4>
+			<div>
+			<span>Thermostats count:</span> <input style="width: 3em;" type="number" name="rlcnt" value="16"  min="0" max="16" required>
+			</div>
+			<div>
+				<span>Thermostats:</span><br>
+				<div class="thm">
+					<b>01: </b> 
+					<input name="thme1" type="checkbox" checked> <span>ENABLE</span>
+					<input name="thmmod1" type="checkbox" checked><span>AUTO</span>
+					<span>Title:</span><input name="thmn1" type="input" >
+					<br> 
+					<input name="thmstt1" type="checkbox" ><span>OFF</span> 
+					Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> 
+					DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1">
+					Temp Set: <input style="width: 4em;" name="thmtmps1" type="number" min="20" max="30" step="0.5" value="24.0">
+					Temp Delta: <input style="width: 4em;" name="thmdlt1" type="number" min="0.5" max="3" step="0.5" value="0.5">	
+					Power: <input style="width: 4em;" name="thmpwr1" type="number" min="0" max="3000" step="50" value="1500">	
+				  Priority: <input style="width: 2em;" name="thmprt1" type="number" min="0" max="10" step="1" value="1">					
+				</div>
+				<div class="thm">
+					<b>02: </b> <input name="thme2" type="checkbox" checked> <span>ENABLE</span>				
+					<input name="thmstt2" type="checkbox" checked><span>ON</span>
+					<input name="thmmod2" type="checkbox" ><span>MANUAL</span>
+					Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> 
+					DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1">
+					Temp Set: <input style="width: 4em;" name="thmtmps1" type="number" min="20" max="30" step="0.5" value="27.5"> 
+					Temp Delta: <input style="width: 4em;" name="thmdlt1" type="number" min="0.5" max="3" step="0.5" value="0.5">	
+					Power: <input style="width: 4em;" name="thmpwr1" type="number" min="0" max="3000" step="50" value="1500">
+					Priority: <input style="width: 2em;" name="thmprt1" type="number" min="0" max="10" step="1" value="1">						
+					<br> 
+					<span>Title:</span><input name="thmn2" type="input" >
+				</div>
+				<div class="thm"><b>03: </b> <input name="thme3" type="checkbox" checked> <span>ENABLE</span><span>Title:</span><input name="thmn3" type="input" ><br> <input name="thmstt3" type="checkbox" checked><span>ON</span>Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1"></div>
+				<div class="thm"><b>04: </b> <input name="thme4" type="checkbox" > <span>DISABLE</span><span>Title:</span><input name="thmn4" type="input" ><br> <input name="thmstt4" type="checkbox" ><span>OFF</span>Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1"></div>
+				<div class="thm"><b>05: </b> <input name="thme5" type="checkbox" checked> <span>ENABLE</span><span>Title:</span><input name="thmn5" type="input" ><br> <input name="thmstt5" type="checkbox" ><span>OFF</span>Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1"></div>
+				<div class="thm"><b>06: </b> <input name="thme6" type="checkbox" > <span>DISABLE</span><span>Title:</span><input name="thmn6" type="input" ><br> <input name="thmstt6" type="checkbox" checked><span>ON</span>Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1"></div>
+				<div class="thm"><b>07: </b> <input name="thme7" type="checkbox" checked> <span>ENABLE</span><span>Title:</span><input name="thmn7" type="input" ><br> <input name="thmstt7" type="checkbox" ><span>OFF</span>Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1"></div>
+				<div class="thm"><b>08: </b> <input name="thme8" type="checkbox" > <span>DISABLE</span><span>Title:</span><input name="thmn8" type="input" ><br> <input name="thmstt8" type="checkbox" checked><span>ON</span>Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1"></div>
+				<div class="thm"><b>09: </b> <input name="thme9" type="checkbox" checked> <span>ENABLE</span><span>Title:</span><input name="thmn9" type="input" ><br> <input name="thmstt9" type="checkbox" checked><span>ON</span>Relay: <input style="width: 3em;" name="thmrel1" type="number" min="0" max="16" value="1"> DSW: <input style="width: 3em;" name="thmdsw1" type="number" min="0" max="10" value="1"></div>
+			</div>
+		</div>
+		<input type="hidden" name="st" value="1">
+		<br>
+		<input type="submit" value="Save"> 
+	</form>
 	
 	<div class="h" style="background:#808080">Config:</div>
 	<div class="c">
-		<a href="configmain">Main</a> 
-		<a href="configall">Options</a> 
-		<a href="configsrv">OneWire</a> 
-		<a href="configpio">Relays</a> 
-		<a href="config1wire">Thermostats</a> 
+		<a href="index.html">Main</a> 
+		<a href="options.html">Options</a> 
+		<a href="onewire.html">OneWire</a> 
+		<a href="relays.html">Relays</a> 
+		<a href="therms.html">Thermostats</a> 
 	</div>
 </div>
 </body>

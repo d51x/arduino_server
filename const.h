@@ -11,6 +11,8 @@
 #define CONST_OFF (const char *)F("OFF")
 
 #define ONE_WIRE_BUS 8
+#define I2C_SDA_PIN	2
+#define I2C_SCL_PIN	0
 
 #define FIRST_START_TIMEOUT 1//*1000
 #define READ_TEMP_INTERVAL 10//*1000 //30sec

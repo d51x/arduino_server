@@ -65,10 +65,10 @@ void load_options() {
 
 	EEPROM.get(EEPROM_ADDRESS_GLOBAL_OPTIONS_START, options);	
 	
-	if ( (options.pin_onewire < 2) || (options.pin_onewire > 60)) options.pin_onewire = ONE_WIRE_BUS;
+	if ( (options.pin_onewire < 2) || (options.pin_onewire > 54)) options.pin_onewire = ONE_WIRE_BUS;
 	if (( options.device_name[0] == 0 ) || (options.device_name[0] == 255)) strcpy(options.device_name, "arduino"); 
 	if ( (options.firstStartTimeout == 255) || (options.firstStartTimeout == 0) ) options.firstStartTimeout = FIRST_START_TIMEOUT;
-	if ( options.max_power == 65536 ) options.max_power = 0;
+	if ( options.max_power == 16000 ) options.max_power = 0;
 	if ( (options.thermostat_refresh == 255) || (options.thermostat_refresh == 0) ) options.thermostat_refresh = 10;
 	if ( (options.temperature_refresh == 255) || (options.temperature_refresh == 0) ) options.temperature_refresh = READ_TEMP_INTERVAL;
 	byte t0[6] = {0, 0, 0, 0, 0, 0};
@@ -82,25 +82,24 @@ void load_options() {
 	if ( (options.therms_count > 10) ) options.therms_count = 10;
 	if ( (options.asc_count > 6) ) options.asc_count = 6;
 	if ( (options.i2c_count > 8) ) options.i2c_count = 8;
+	if ( (options.pin_i2c_sda < 0) || (options.pin_i2c_sda > 54) ) options.pin_i2c_sda = I2C_SDA_PIN;
+	if ( (options.pin_i2c_scl < 0) || (options.pin_i2c_scl > 54) ) options.pin_i2c_scl = I2C_SCL_PIN;
 
 #ifdef DEBUG1
 	WRITE_TO_SERIAL(F("--------- "), F(" loaded options "), F(" "), F(""));
 	WRITE_TO_SERIAL(F("OneWire Pin: "), options.pin_onewire, F(" "), F(""));
 	WRITE_TO_SERIAL(F("Device name: "), (char*)options.device_name, F(" "), F(""));
-	WRITE_TO_SERIAL(F("firstStartTimeout: "), options.firstStartTimeout, F(" "), F(""));	
-	WRITE_TO_SERIAL(F("max_power: "), options.max_power, F(" "), F(""));
-	WRITE_TO_SERIAL(F("thermostat_refresh: "), options.thermostat_refresh, F(" "), F(""));
-	WRITE_TO_SERIAL(F("temperature_refresh: "), options.temperature_refresh, F(" "), F(""));
-	
+	WRITE_TO_SERIAL(F("firstStartTimeout: "), options.firstStartTimeout, F("    max_power: "), options.max_power);	
+	WRITE_TO_SERIAL(F("thermostat_refresh: "), options.thermostat_refresh, F("   temperature_refresh: "), options.temperature_refresh);
+		
 	WRITE_TO_SERIAL_BYTE_ARR(F("eth_ip: "), options.eth_ip, DEC);
 	WRITE_TO_SERIAL_BYTE_ARR(F("eth_mac: "), options.eth_mac, HEX);
 	WRITE_TO_SERIAL_BYTE_ARR(F("mqtt_ip: "), options.mqtt_ip, DEC);
 	
-	WRITE_TO_SERIAL(F("relays_count: "), options.relays_count, F(" "), F(""));
+	WRITE_TO_SERIAL(F("relays_count: "), options.relays_count, F("   therms_count: "), options.therms_count);
 	WRITE_TO_SERIAL(F("dsw_count: "), options.dsw_count, F(" "), F(""));
-	WRITE_TO_SERIAL(F("therms_count: "), options.therms_count, F(" "), F(""));
-	WRITE_TO_SERIAL(F("asc_count: "), options.asc_count, F(" "), F(""));
-	WRITE_TO_SERIAL(F("i2c_count: "), options.i2c_count, F(" "), F(""));
+	WRITE_TO_SERIAL(F("asc_count: "), options.asc_count, F("   i2c_count: "), options.i2c_count);
+	WRITE_TO_SERIAL(F("i2c sda pin: "), options.pin_i2c_sda, F("   i2c scl pin: "), options.pin_i2c_scl);
 	WRITE_TO_SERIAL(F("-------- "), F("function load_options"), F(" end"), F(""));	
 #endif
 
@@ -119,6 +118,8 @@ void load_options() {
 	options.therms_count = MAX_THERMOSTAT;	
 	options.asc_count = 0;
 	options.i2c_count = 0;
+	options.pin_i2c_sda = I2C_SDA_PIN;
+	options.pin_i2c_scl = I2C_SCL_PIN;
 #endif
 
 }
