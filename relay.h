@@ -12,7 +12,9 @@ struct RelayInfo {
 	SignalType signalType;  //    Тип сигнала - прямой или инвертный
 	boolean to_flash; //   Хранить во флеш
 	Status status; //   Статус - вкл/выкл
+	#ifdef MEGA
 	RelayComment comment;
+	#endif
 };
 
 

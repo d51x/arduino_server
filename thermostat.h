@@ -18,7 +18,9 @@ struct ThermostatInfo {
 		byte step;   // шаг ругилировки * 10, т.е. 5 * 10 = 50 --> 0,5 градуса
 		byte delta;  // дельта от set_temp, значение * 10, т.е. 5 * 10 = 50 --> 0,5 градуса 
 		word power; // мощность термостата, задается руками
+		#ifdef MEGA
 		ThermostatComment comment;
+		#endif
 };
 
 class Thermostat {

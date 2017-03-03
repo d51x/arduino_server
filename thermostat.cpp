@@ -3,7 +3,9 @@
 
 Thermostat::Thermostat() :	index(255)
 {
+  #ifdef MEGA
   memset(info.comment, 0, sizeof(ThermostatComment)) ;
+  #endif
 	info.priority = 255;
 	info.state = DISABLE;
 	info.status = OFF;
@@ -161,14 +163,14 @@ void Thermostat::publish_mode(PubSubClient *mqtt_client, const char *device){
 void Thermostat::saveMode(byte* payload) {
 	  char* cstring = (char*)payload;
 	  info.mode = ( strcmp_P( cstring, CONST_ON) == 0 ) ?  AUTO : MANUAL ;
-	  WRITE_TO_SERIAL(F("Thermostat::saveMode: "), cstring, F(" info.mode: "), (info.mode == AUTO) ? "AUTO" : "MANUAL" );	
+	  //WRITE_TO_SERIAL(F("Thermostat::saveMode: "), cstring, F(" info.mode: "), (info.mode == AUTO) ? "AUTO" : "MANUAL" );	
 	  save_eeprom();
 }
 
 void Thermostat::saveState(byte* payload) {
 	  char* cstring = (char*)payload;
 	  info.state = ( strcmp_P( cstring, CONST_ON) == 0 ) ? ENABLE : DISABLE;
-	  WRITE_TO_SERIAL(F("Thermostat::saveState: "), cstring, F(" info.state: "), (info.mode == ENABLE) ? "ENABLE" : "DISABLE" );
+	  //WRITE_TO_SERIAL(F("Thermostat::saveState: "), cstring, F(" info.state: "), (info.mode == ENABLE) ? "ENABLE" : "DISABLE" );
 	  save_eeprom();
 }
 

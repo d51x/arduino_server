@@ -3,7 +3,9 @@
 
 Relay::Relay() : index(255)
 {
+	#ifdef MEGA
 	memset(info.comment, 0, sizeof(RelayComment)) ;
+	#endif
 	info.pin = 255;
 	info.state = DISABLE; 
 	info.signalType = NORMAL;

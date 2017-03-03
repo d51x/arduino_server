@@ -12,7 +12,10 @@
 #include "const.h"
 #include "relay.h"
 #include "thermostat.h"
+
+#ifdef MEGA
 #include "http.h"
+#endif
 //#include <SD.h>
 
 /* arduino.ru/forum/programmirovanie/zapis-i-chtenie-eeprom */
@@ -46,7 +49,10 @@ long lastReadingTime2 = 0;
 long lastReadingTime3 = 0;
 long lastReadingTime4 = 0;
 
+#ifdef MEGA
 EthernetServer server(80);
+#endif
+
 EthernetClient ethClient;
 PubSubClient mqtt_client(ethClient);
 
@@ -69,7 +75,11 @@ int memoryFree()
 
 void load_options() {
 #ifdef RESET_EEPROM
-	for (word ee=0;ee<4096;ee++) EEPROM.write(ee, 0);
+	#ifdef MEGA
+		for (word ee=0;ee<4096;ee++) EEPROM.write(ee, 0);
+	#else
+		for (word ee=0;ee<1024;ee++) EEPROM.write(ee, 0);
+	#endif
 #endif
 	
 #ifdef DEBUG1
@@ -79,7 +89,7 @@ void load_options() {
 	EEPROM.get(EEPROM_ADDRESS_GLOBAL_OPTIONS_START, options);	
 	
 	if ( (options.pin_onewire < 2) || (options.pin_onewire > 54)) options.pin_onewire = ONE_WIRE_BUS;
-	if (( options.device_name[0] == 0 ) || (options.device_name[0] == 255)) strcpy(options.device_name, "arduino"); 
+	if (( options.device_name[0] == 0 ) || (options.device_name[0] == 255)) strcpy_P(options.device_name, P_DEVICE_NAME); 
 	if ( (options.firstStartTimeout == 255) || (options.firstStartTimeout == 0) ) options.firstStartTimeout = FIRST_START_TIMEOUT;
 	if ( options.max_power == 16000 ) options.max_power = 0;
 	if ( (options.thermostat_refresh == 255) || (options.thermostat_refresh == 0) ) options.thermostat_refresh = 10;
@@ -93,11 +103,13 @@ void load_options() {
 	if ( (options.relays_count > 16) ) options.relays_count = 16;
 	if ( (options.dsw_count > 16) ) options.dsw_count = 16;
 	if ( (options.therms_count > 10) ) options.therms_count = 10;
-	if ( (options.asc_count > 6) ) options.asc_count = 6;
-	if ( (options.i2c_count > 8) ) options.i2c_count = 8;
-	if ( (options.pin_i2c_sda < 0) || (options.pin_i2c_sda > 54) ) options.pin_i2c_sda = I2C_SDA_PIN;
-	if ( (options.pin_i2c_scl < 0) || (options.pin_i2c_scl > 54) ) options.pin_i2c_scl = I2C_SCL_PIN;
-
+	#ifdef MEGA
+		if ( (options.asc_count > 6) ) options.asc_count = 6;
+		if ( (options.i2c_count > 8) ) options.i2c_count = 8;
+		if ( (options.pin_i2c_sda < 0) || (options.pin_i2c_sda > 54) ) options.pin_i2c_sda = I2C_SDA_PIN;
+		if ( (options.pin_i2c_scl < 0) || (options.pin_i2c_scl > 54) ) options.pin_i2c_scl = I2C_SCL_PIN;
+    #endif
+	
 #ifdef DEBUG1
 	WRITE_TO_SERIAL(F("--------- "), F(" loaded options "), F(" "), F(""));
 	WRITE_TO_SERIAL(F("OneWire Pin: "), options.pin_onewire, F(" "), F(""));
@@ -111,15 +123,19 @@ void load_options() {
 	
 	WRITE_TO_SERIAL(F("relays_count: "), options.relays_count, F("   therms_count: "), options.therms_count);
 	WRITE_TO_SERIAL(F("dsw_count: "), options.dsw_count, F(" "), F(""));
-	WRITE_TO_SERIAL(F("asc_count: "), options.asc_count, F("   i2c_count: "), options.i2c_count);
-	WRITE_TO_SERIAL(F("i2c sda pin: "), options.pin_i2c_sda, F("   i2c scl pin: "), options.pin_i2c_scl);
+	
+	#ifdef MEGA
+	  WRITE_TO_SERIAL(F("asc_count: "), options.asc_count, F("   i2c_count: "), options.i2c_count);
+	  WRITE_TO_SERIAL(F("i2c sda pin: "), options.pin_i2c_sda, F("   i2c scl pin: "), options.pin_i2c_scl);
+	#endif
+	
 	WRITE_TO_SERIAL(F("-------- "), F("function load_options"), F(" end"), F(""));	
 #endif
 
   
 #ifdef TEST
 	options.pin_onewire = ONE_WIRE_BUS;
-	strcpy(options.device_name, "arduino");
+	strcpy_P(options.device_name, P_DEVICE_NAME);
 	options.max_power = 3500;
 	options.thermostat_refresh = 10;
 	options.temperature_refresh = READ_TEMP_INTERVAL;
@@ -129,10 +145,12 @@ void load_options() {
 	options.relays_count = MAX_RELAY;
 	options.dsw_count = MAX_DSW_TEMPERATURE_SENSORS;
 	options.therms_count = MAX_THERMOSTAT;	
+	#ifdef MEGA
 	options.asc_count = 0;
 	options.i2c_count = 0;
 	options.pin_i2c_sda = I2C_SDA_PIN;
 	options.pin_i2c_scl = I2C_SCL_PIN;
+	#endif
 #endif
 
 }
@@ -148,7 +166,9 @@ void init_temperature_sensors(DSW_Temp *sensors) {
 		#ifdef DEBUG
 			WRITE_TO_SERIAL(F("dsw sensor: "), sensors[i].index+1, F(" state "), sensors[i].info.state);
 			WRITE_TO_SERIAL_BYTE_ARR(F("address: "), sensors[i].info.address, HEX);
+			#ifdef MEGA
 			WRITE_TO_SERIAL_CHAR_ARR(F("comment: "), sensors[i].info.comment);	
+			#endif
 		#endif		
 	}
 	
@@ -158,25 +178,28 @@ void init_temperature_sensors(DSW_Temp *sensors) {
 	byte addr_f1_kitchen[8] = {0x28, 0xFF, 0xB8, 0xBA, 0x73, 0x16, 0x05, 0xC1};
 	memcpy(sensors[0].info.address, addr_f1_kitchen, 8); 	
 	sensors[0].info.state = ENABLE;
-	strcpy(sensors[0].info.comment, "kitchen");
 	
 	byte addr_f1_living[8] = {0x28, 0xFF, 0x81, 0xE9, 0x74, 0x16, 0x03, 0x41};
 	memcpy(sensors[1].info.address, addr_f1_living, 8); 
 	sensors[1].info.state = ENABLE;
-	strcpy(sensors[1].info.comment, "living room");
 	
 	byte addr_f1_boiler_room[8] = {0x28, 0xFF, 0x9B, 0xC3, 0x73, 0x16, 0x05, 0x4C};
 	memcpy(sensors[2].info.address, addr_f1_boiler_room, 8); 
 	sensors[2].info.state = ENABLE;	
-	strcpy(sensors[2].info.comment, "boiler room");
 	
 	memcpy(sensors[3].info.address, addr_f1_kitchen, 8); 	
 	sensors[3].info.state = ENABLE;
-	strcpy(sensors[3].info.comment, "room 2.1");
 	
 	memcpy(sensors[4].info.address, addr_f1_living, 8); 
 	sensors[4].info.state = ENABLE;
+
+	#ifdef MEGA
+	strcpy(sensors[0].info.comment, "kitchen");
+	strcpy(sensors[1].info.comment, "living room");
+	strcpy(sensors[2].info.comment, "boiler room");
+	strcpy(sensors[3].info.comment, "room 2.1");
 	strcpy(sensors[4].info.comment, "room 2.2");
+	#endif
 	
 #endif
 	
@@ -185,7 +208,9 @@ void init_temperature_sensors(DSW_Temp *sensors) {
 	for (byte i=0;i<options.dsw_count;i++) {
 			WRITE_TO_SERIAL(F("dsw sensor: "), sensors[i].index+1, F(" state "), sensors[i].info.state);
 			WRITE_TO_SERIAL_BYTE_ARR(F("address: "), sensors[i].info.address, HEX);
+			#ifdef MEGA
 			WRITE_TO_SERIAL_CHAR_ARR(F("comment: "), sensors[i].info.comment);	
+			#endif
 	} 
   WRITE_TO_SERIAL(F("-------- "), F("function init_temperature_sensors"), F(" end"), F(""));	
  #endif 	  
@@ -203,7 +228,9 @@ void init_relays(Relay *rel) {
 	WRITE_TO_SERIAL(F("Relay: "), rel[i].index+1, F(" pin "), rel[i].info.pin);  
 	WRITE_TO_SERIAL(F("status: "), rel[i].info.status, F(" state "), rel[i].info.state);  
 	WRITE_TO_SERIAL(F("flash: "), rel[i].info.to_flash, F(" signal "), rel[i].info.signalType);  
+	#ifdef MEGA
 	WRITE_TO_SERIAL_CHAR_ARR(F("comment: "), rel[i].info.comment);
+	#endif
   }
 #endif
   
@@ -232,7 +259,9 @@ void init_relays(Relay *rel) {
 	WRITE_TO_SERIAL(F("Relay: "), rel[i].index+1, F(" pin "), rel[i].info.pin);  
 	WRITE_TO_SERIAL(F("status: "), rel[i].info.status, F(" state "), rel[i].info.state);  
 	WRITE_TO_SERIAL(F("flash: "), rel[i].info.to_flash, F(" signal "), rel[i].info.signalType);  
+	#ifdef MEGA
 	WRITE_TO_SERIAL_CHAR_ARR(F("comment: "), rel[i].info.comment);
+	#endif
   }
 #endif
   
@@ -276,7 +305,9 @@ void init_thermostats(Thermostat *therm, Relay *rel, DSW_Temp *temp) {
 	WRITE_TO_SERIAL(F("status: "), therm[i].info.status, F(" priority "), therm[i].info.priority);  
 	WRITE_TO_SERIAL(F("mode: "), therm[i].info.mode, F(" power "), therm[i].info.power);  
 	WRITE_TO_SERIAL(F("set_temp: "), therm[i].info.set_temp, F(" delta "), therm[i].info.delta);  
+	#ifdef MEGA
 	WRITE_TO_SERIAL_CHAR_ARR(F("comment: "), therm[i].info.comment);
+	#endif
   }
   
   WRITE_TO_SERIAL(F("-------- "), F("function init_thermostats"), F(" start"), F(""));	
@@ -348,28 +379,28 @@ void callback(char* topic, byte* payload, unsigned int length) {
 	  relay[i-1].switch_relay(payload2);
 	  relay[i-1].publish(&mqtt_client, options.device_name);
     } else if (strcmp_P(path, P_THERM_MODE_CMD ) == 0) {
-		#ifdef DEBUG  
+		#ifdef DEBUG1  
 		  WRITE_TO_SERIAL(F("callback: "), path, F(" idx "), i);	
 		  WRITE_TO_SERIAL(F("THERM_MODE: "), i, F(" to "), (char*)payload2);	
 		#endif 	
 		if ( i == 255 ) return;
 		thermostat[i-1].saveMode(payload2);
 	} else if (strcmp_P(path, P_THERM_STATE_CMD ) == 0) {
-		#ifdef DEBUG  
+		#ifdef DEBUG1  
 		  WRITE_TO_SERIAL(F("callback: "), path, F(" idx "), i);	
 		  WRITE_TO_SERIAL(F("THERM_STATE: "), i, F(" to "), (char*)payload2);	
 		#endif 			
 		if ( i == 255 ) return;
 		thermostat[i-1].saveState(payload2);
 	} else if (strcmp_P(path, P_THERM_STATUS_CMD ) == 0) {
-		#ifdef DEBUG  
+		#ifdef DEBUG1  
 		  WRITE_TO_SERIAL(F("callback: "), path, F(" idx "), i);	
 		  WRITE_TO_SERIAL(F("THERM_STATUS: "), i, F(" to "), (char*)payload2);	
 		#endif 			
 		if ( i == 255 ) return;
 		thermostat[i-1].setStatus(payload2, options.device_name);
 	} else if (strcmp_P(path, P_THERM_SET_TEMP_CMD ) == 0) {
-		#ifdef DEBUG  
+		#ifdef DEBUG1  
 		  WRITE_TO_SERIAL(F("callback: "), path, F(" idx "), i);	
 		  WRITE_TO_SERIAL(F("THERM_SET_TEMP: "), i, F(" to "), (char*)payload2);	
 		#endif 			
@@ -398,7 +429,7 @@ void reconnect() {
 	  char *s =(char*)malloc( strlen(options.device_name + 3) );
 	  strcpy(s, options.device_name);
 	  strcat(s, "/#");
-		#ifdef DEBUG  
+		#ifdef DEBUG1  
 		  WRITE_TO_SERIAL(F("reconnect mqtt: "), s, F(""), F(""));	
 		#endif 		  
       mqtt_client.subscribe( s );
@@ -413,7 +444,7 @@ void reconnect() {
 
 void setup() {
 	//for (int t=0;t<1024;t++) EEPROM.write(t, 255);
-#ifdef DEBUG
+#ifdef DEBUG1
 	Serial.begin(9600);
 	while (!Serial) {
 		//  ; // wait for serial port to connect. Needed for native USB port only
@@ -432,7 +463,7 @@ void setup() {
   
   load_options();
 
-#ifdef DEBUG
+#ifdef DEBUG1
 	WRITE_TO_SERIAL(F("--------- "), F(" loaded options "), F(" "), F(""));
 	WRITE_TO_SERIAL(F("OneWire Pin: "), options.pin_onewire, F(" "), F(""));
 	WRITE_TO_SERIAL(F("Device name: "), (char*)options.device_name, F(" "), F(""));
@@ -448,8 +479,10 @@ void setup() {
 	WRITE_TO_SERIAL(F("relays_count: "), options.relays_count, F(" "), F(""));
 	WRITE_TO_SERIAL(F("dsw_count: "), options.dsw_count, F(" "), F(""));
 	WRITE_TO_SERIAL(F("thermo_count: "), options.therms_count, F(" "), F(""));
+	#ifdef MEGA
 	WRITE_TO_SERIAL(F("asc_count: "), options.asc_count, F(" "), F(""));
 	WRITE_TO_SERIAL(F("i2c_count: "), options.i2c_count, F(" "), F(""));
+	#endif
 	WRITE_TO_SERIAL(F("-------- "), F("function load_options"), F(" end"), F(""));	
 #endif
 
@@ -459,7 +492,9 @@ void setup() {
   mqtt_client.setCallback(callback);
   
   Ethernet.begin(mac, ip);
+  #ifdef MEGA
   server.begin();
+  #endif
 
    ds.begin(options.pin_onewire);
    temp_sensors = DallasTemperature(&ds);
@@ -716,14 +751,14 @@ void termostat_update() {
 			  // еще не превысили мощность, включаем
 			   thermostat[k].turnON(options.device_name);
 			   cur_power = tpwr;
-				 #ifdef DEBUG 
+				 #ifdef DEBUG1 
 				  WRITE_TO_SERIAL(F("new current power: "), cur_power, F(""), F(""));	
 				#endif 
 		  } else {
 			  // превысили мощность, нужно выключить наименее приоритетные
 			  // выключаем с низким приоритетом
 			  
-				 #ifdef DEBUG  
+				 #ifdef DEBUG1 
 				  WRITE_TO_SERIAL(F("current power is overload!!! "), cur_power, F(", try to decrease power..."), F(""));	
 				#endif 
 				
@@ -777,7 +812,7 @@ void uptime(const char* topic, long val) {
   free(sval);
 }
 
-
+/*
 void print_relays(EthernetClient &client, Relay *rel) {
   for (byte i=0;i<MAX_RELAY;i++) {
 	client.print(F("<strong>Relay "));	 client.print(rel[i].index+1); client.print(F("</strong>"));  
@@ -802,7 +837,9 @@ void print_relays(EthernetClient &client, Relay *rel) {
   }
 
 }
+*/
 
+/*
 void print_temp(EthernetClient &client, DSW_Temp *temp) {
   for (byte i=0;i<MAX_DSW_TEMPERATURE_SENSORS;i++) {
 	client.print(F("<strong>DSW "));	 client.print(i+1); client.print(F("</strong>"));  
@@ -823,7 +860,9 @@ void print_temp(EthernetClient &client, DSW_Temp *temp) {
 	client.print(F("<br>"));
   }
 }
+*/
 
+/*
 void print_thermostat(EthernetClient &client, Thermostat *therm) {
   for (byte i=0;i<options.therms_count;i++) {
 	client.print(F("<strong>Thermostat "));	 client.print(therm[i].index+1); client.print(F("</strong>"));  
@@ -839,23 +878,25 @@ void print_thermostat(EthernetClient &client, Thermostat *therm) {
 	client.print(F("<a href=\"/therm/mode/"));  client.print(therm[i].index); 	
 	client.print((therm[i].info.mode == AUTO) ?  F("/manual\"><b>AUTO</b>") : F("/auto\"><b>MANUAL</b>")); 
 	client.print(F("</a>"));
-/*     client.print(F("<span> Relay </span>")); 
-	client.print(therm[i].relay->idx);
-	client.print(F("<span> Sensor </span>")); 
-	client.print(therm[i].tempSensor->value);
-    client.print(F("<span> Address </span>")); 
-	char tmp[8] = "";
-	for (uint8_t j = 0; j < 8; j++)
-	{
-				client.print(F("0x"));
-				if (therm[i].tempSensor->addr[j] < 0x10) client.print(F("0"));
-				client.print(therm[i].tempSensor->addr[j], HEX);
-				if (j < 7) client.print(F(", "));
-	} */	
+//     client.print(F("<span> Relay </span>")); 
+	// client.print(therm[i].relay->idx);
+	// client.print(F("<span> Sensor </span>")); 
+	// client.print(therm[i].tempSensor->value);
+    // client.print(F("<span> Address </span>")); 
+	// char tmp[8] = "";
+	// for (uint8_t j = 0; j < 8; j++)
+	// {
+				// client.print(F("0x"));
+				// if (therm[i].tempSensor->addr[j] < 0x10) client.print(F("0"));
+				// client.print(therm[i].tempSensor->addr[j], HEX);
+				// if (j < 7) client.print(F(", "));
+	// } 
 	client.print(F("<br>"));
   }
 }
+*/
 
+/*
 void generatePage(EthernetClient client){
   //client.println(F("<!DOCTYPE HTML>"));
   //client.println(F("<html>"));
@@ -876,8 +917,8 @@ void generatePage(EthernetClient client){
   //client.println(F("</html>"));
 }
 
-
-
+*/
+/*
 void listenForEthernetClients() {
 	// listen for incoming clients
 	EthernetClient client = server.available();
@@ -896,11 +937,11 @@ void listenForEthernetClients() {
 			// respond to client only after last line received
 			if (c == '\n' && currentLineIsBlank) {
 				request = getUrlFromHeader(&request);
-				WRITE_TO_SERIAL(F("Request: "), request, F(""), F(""));	
+				//WRITE_TO_SERIAL(F("Request: "), request, F(""), F(""));	
 				
 			  if(request=="/") {
-				successHeader(client);
-				generatePage(client);
+				//successHeader(client);
+				//generatePage(client);
 			  } else {
 				  
 				  
@@ -916,15 +957,15 @@ void listenForEthernetClients() {
 					// разбор get запросов вида /dev/func/idx для страниц
 					if ( dev.equals( HTTP_SLUG_RELAY ) ) {
 						if ( func.equals( HTTP_SLUG_STATE ) ) {
-							redirectHeader(client, "/");
+							//redirectHeader(client, "/");
 						} else if (func.equals( HTTP_SLUG_STATUS )) {
 							relay[idx.toInt()].switch_relay( request.equals( CONST_ON ) ? OFF : ON);
 							relay[idx.toInt()].publish( &mqtt_client, options.device_name );
-							redirectHeader(client, "/");						
+							//redirectHeader(client, "/");						
 						} else if (func.equals( HTTP_SLUG_SIGNAL )) {
-							redirectHeader(client, "/");						
+							//redirectHeader(client, "/");						
 						} else if (func.equals( HTTP_SLUG_FLASH )) {
-							redirectHeader(client, "/");						
+							//redirectHeader(client, "/");						
 						}
 					} else if ( dev.equals( HTTP_SLUG_THERM ) ) {
 						if ( func.equals( HTTP_SLUG_STATE ) ) {
@@ -932,12 +973,12 @@ void listenForEthernetClients() {
 							redirectHeader(client, "/");
 						} else if ( func.equals( HTTP_SLUG_MODE ) ) {
 							thermostat[idx.toInt()].setMode( request.equals( HTTP_SLUG_AUTO ) ? AUTO : MANUAL);
-							redirectHeader(client, "/");
+							//redirectHeader(client, "/");
 						}					
 					} else if ( dev.equals( HTTP_SLUG_DSW ) ) {
 						if ( func.equals( HTTP_SLUG_STATE ) ) {
 							dsw_temp[idx.toInt()].setState( request.equals( HTTP_SLUG_ENABLE ) ? ENABLE : DISABLE);
-							redirectHeader(client, "/");
+							//redirectHeader(client, "/");
 						}					
 					}						
 				}
@@ -964,6 +1005,7 @@ void listenForEthernetClients() {
     client.stop();
     //Serial.println("client disconnected");		
 }
+*/
 
 void loop() {
   
@@ -994,6 +1036,6 @@ void loop() {
   mqtt_client.loop();
   
   // listen for incoming clients
-  listenForEthernetClients();  
+ // listenForEthernetClients();  
   
 }

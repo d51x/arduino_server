@@ -7,7 +7,9 @@
 DSW_Temp::DSW_Temp() :	value(-12700),	index(255)
 {
 	 memset(info.address, 0, sizeof(DeviceAddress)) ;
+	#ifdef MEGA 
 	 memset(info.comment, 0, sizeof(DswComment)) ;
+	#endif 
 	 info.state = DISABLE;
 }
 
@@ -66,7 +68,9 @@ void DSW_Temp::setDeviceAddress(DeviceAddress addr) {
 	save_eeprom();	
 }
 
+#ifdef MEGA
 void DSW_Temp::setDeviceComment(DswComment comm) {
 	memcpy(info.comment, comm, sizeof(DswComment));
 	save_eeprom();	
 }
+#endif

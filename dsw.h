@@ -8,7 +8,9 @@
 struct DSW_Info {
 	State state;	
 	DeviceAddress address;
+	#ifdef MEGA
 	DswComment comment;
+	#endif
 };
 
 class DSW_Temp {
@@ -28,6 +30,8 @@ class DSW_Temp {
 		
 		void setState(State state);
 		void setDeviceAddress(DeviceAddress address);
+		#ifdef MEGA
 		void setDeviceComment(DswComment comment);
+		#endif
 };
 #endif //DSW_H
