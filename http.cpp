@@ -36,3 +36,23 @@ void send(EthernetClient client, const char *ptr)
   while(c=pgm_read_byte(ptr++)) client.print(c);
 }
 
+void generate_main_page(EthernetClient client) {
+	send(client, page_header);
+	
+	// выц sensors
+	send(client, page_main_dsw_start);
+	send(client, page_main_dsw_item);  // loop
+	send(client, page_block_end); 
+	
+	// relays
+	send(client, page_main_relays_start);
+	send(client, page_main_relays_item);  // loop
+	send(client, page_block_end); 
+	
+	// thermostats
+	send(client, page_main_thermostats_start);
+	send(client, page_main_thermostats_item);  // loop
+	send(client, page_block_end); 
+	
+	send(client, page_footer);
+}
