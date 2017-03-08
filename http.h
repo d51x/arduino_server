@@ -19,7 +19,7 @@ const char http_Unauthorized[] PROGMEM = "HTTP/1.0 401 Unauthorized\r\n"\
     "Content-Type: text/html\r\n\r\n"\
     "<h1>401 Unauthorized</h1>";	
 
-const char page_header[] PROGMEM = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">"\
+ const char page_header[] PROGMEM = "";/*"<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">"\
 "<title>%s</title>"\   //device name
 "<meta http-equiv=\"REFRESH\" content=\"60\">"\
 "<meta name=\"viewport\" content=\"width=640\">"\
@@ -34,7 +34,7 @@ const char page_header[] PROGMEM = "<!DOCTYPE html><html><head><meta http-equiv=
 "Free memory: %d B.<br>"\  // free memory
 "Uptime: %s<br>"\  // uptime
 "</div></div></div><div class=\"c2\">";	
-		
+		 */
 const char page_footer[] PROGMEM = "<div class=\"h\" style=\"background:#808080\">Config:</div>"\
 "<div class=\"c\"><a href=\"index.html\">Main</a><a href=\"options.html\">Options</a><a href=\"onewire.html\">OneWire</a>"\ 
 "<a href=\"relays.html\">Relays</a><a href=\"therms.html\">Thermostats</a></div></div></body></html>";
@@ -46,7 +46,7 @@ const char page_main_dsw_start[] PROGMEM = "<div class=\"h\" style=\"background:
 	"<div class=\"c\">";
 			// here: page_main_dsw_item
 
-const char page_main_dsw_item[] PROGMEM = ""<span class=\"tmp %d\"><b>%d:</b> %0.1f °C.</span>";
+const char page_main_dsw_item[] PROGMEM = "<span class=\"tmp %d\"><b>%d:</b> %0.1f °C.</span>";
 
 //----------------------------------------------------------------------
 const char page_main_relays_start[] PROGMEM = "	<div class=\"h\" style=\"background: #73c140\">Relays:</div>"\

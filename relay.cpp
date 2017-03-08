@@ -11,8 +11,15 @@ Relay::Relay() : index(255)
 	info.signalType = NORMAL;
 	info.to_flash = false;
 	info.status = OFF;  
+	this->_mqtt = NULL;
+	this->_device = NULL;
+	//setMqttClient(mqtt);
 }
 
+void Relay::setMqttClient(PubSubClient* mqtt, const char *device){
+    this->_mqtt = mqtt;
+    this->_device = device;
+}
 
 void Relay::load_eeprom() {
     int addr = EEPROM_ADDRESS_RELAY_START + index*RELAY_DATA_SIZE;
@@ -54,22 +61,22 @@ boolean Relay::begin() {
 	
 }
 
-void Relay::publish(PubSubClient *mqtt_client, const char *device) {
+void Relay::publish() {
 	//(const char* topic, int value) {
   if (index == 255) return;
-  byte i = strlen(device);
+  byte i = strlen(_device);
   byte l = strlen(P_GPIO_OUT_STATE);
   char* buffer = (char*)malloc( i+l+1+2 );
   if ( buffer == NULL) return;
   //WRITE_TO_SERIAL(F("-------- "), device, F(""), F(""));	
-  strcpy(buffer, device);
+  strcpy(buffer, _device);
   strcat_P(buffer, (char*)P_GPIO_OUT_STATE);
   sprintf_P(buffer, PSTR("%s%d"), buffer, index+1);
 
   char* s = (char*)malloc( 4 );
   strcpy_P(s, (info.status == ON) ? CONST_ON : CONST_OFF);
    //WRITE_TO_SERIAL(F("relay_publish: "), (char*)buffer, F(" val "), (char*)s);
-  mqtt_client->publish( buffer, s);
+  _mqtt->publish( buffer, s);
   //mqtt_client->publish( buffer, status);
   
 #ifdef DEBUG1  
@@ -86,12 +93,14 @@ void Relay::turnOFF() {
 	info.status = OFF;
 	digitalWrite(info.pin, (info.signalType == INVERT) ? HIGH : LOW);
 	if (info.to_flash) { save_status_eeprom(); }
+	publish();
 }
 
 void Relay::turnON() {
 	info.status = ON;
 	digitalWrite(info.pin, (info.signalType == INVERT) ? LOW : HIGH);
 	if (info.to_flash) { save_status_eeprom(); }
+	publish();
 }
 
 void Relay::switch_relay(byte* payload) {

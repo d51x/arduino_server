@@ -24,34 +24,38 @@ struct ThermostatInfo {
 };
 
 class Thermostat {
+	private:
+		PubSubClient *_mqtt;
+		char *_device;
+		
 	public:
 	    byte index;
 		ThermostatInfo info;
 		Relay *relay;
 		DSW_Temp *tempSensor;
-		PubSubClient *mqtt;
 
 		Thermostat();
 		//~Thermostat(){};
 		
+		void setMqttClient(PubSubClient *client, const char *device);
 		void setRelay(Relay *relay);
 		void setTemp(DSW_Temp *tempSensor);
 		
 		void load_eeprom();
 		void save_eeprom();
 
-		void publish_state(PubSubClient *mqtt_client, const char *device);
-		void publish_status(PubSubClient *mqtt_client, const char *device);
-		void publish_set_temp(PubSubClient *mqtt_client, const char *device);
-		void publish_mode(PubSubClient *mqtt_client, const char *device);
-		void turnOFF(const char *device);
-		void turnON(const char *device);
+		void publish_state();
+		void publish_status();
+		void publish_set_temp();
+		void publish_mode();
+		void turnOFF();
+		void turnON();
 		void saveMode(byte* payload);
 		void setMode(Mode mode);
 		void saveState(byte* payload);
-		void setState(State state, const char *device);
+		void setState(State state);
 		void saveSetTemp(byte* payload);
-		void setStatus(byte* payload, const char *device);
-		void setStatus(Status st, const char *device);
+		void setStatus(byte* payload);
+		void setStatus(Status st);
 };
 #endif //THERMOSTAT_H

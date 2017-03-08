@@ -19,19 +19,26 @@ struct RelayInfo {
 
 
 class Relay {
+	private:
+		PubSubClient *_mqtt;
+		char *_device;
 	public:
 		byte index;
 		RelayInfo info;
 
+		
+		
 		Relay();
 		//~Relay(){};
+		
 		boolean begin();
+		void setMqttClient(PubSubClient *client, const char *device);
 		
 		void load_eeprom();
 		void save_eeprom();
 		void save_status_eeprom();
 		
-		void publish(PubSubClient *mqtt_client, const char *device);
+		void publish();
 		
 		void turnOFF();
 		void turnON();

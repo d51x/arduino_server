@@ -16,10 +16,16 @@ Thermostat::Thermostat() :	index(255)
 	info.power = 0;
 	info.idx_relay = 255;
 	info.idx_temp = 255;
-	relay = NULL;
-	tempSensor = NULL;
-	mqtt = NULL;
-	//device = NULL;
+	this->relay = NULL;
+	this->tempSensor = NULL;
+	this->_mqtt = NULL;
+	this->_device = NULL;	
+
+}
+
+void Thermostat::setMqttClient(PubSubClient* mqtt, const char *device){
+    this->_mqtt = mqtt;
+    this->_device = device;
 }
 
 void Thermostat::load_eeprom() {
@@ -39,50 +45,52 @@ void Thermostat::save_eeprom() {
 }
 
 void Thermostat::setRelay(Relay *rel) {
-	relay = rel;
+	this->relay = rel;
 }
 
 void Thermostat::setTemp(DSW_Temp *temp){
-	tempSensor = temp;
+	this->tempSensor = temp;
 }
 
-void Thermostat::turnOFF(const char *device) {
+void Thermostat::turnOFF() {
 #ifdef DEBUG1  
   WRITE_TO_SERIAL(F("Thermostat::turnOFF "), index+1, F(" is OFF"), F(""));	
 #endif 
 	info.status = OFF;
 	relay->turnOFF();
-	relay->publish(mqtt, device);
-	publish_status(mqtt, device);
+	//WRITE_TO_SERIAL(F("Relay::index "), relay->index+1, F(" is "), relay->info.state);	
+	publish_status();
 
 	
 }
 
-void Thermostat::turnON(const char *device) {
+void Thermostat::turnON() {
 #ifdef DEBUG1  
   WRITE_TO_SERIAL(F("Thermostat::turnON "), index+1, F(" is ON"), F(""));	
+
 #endif 	
 	info.status = ON;
 	relay->turnON();	
-	relay->publish(mqtt, device);
-	publish_status(mqtt, device);
+	  //WRITE_TO_SERIAL(F("Relay::index "), relay->index+1, F(" is "), relay->info.state);	
+	  
+	publish_status();
 }
 
-void Thermostat::publish_state(PubSubClient *mqtt_client, const char *device) {
+void Thermostat::publish_state() {
 	//(const char* topic, int value) {
   if (index == 255) return;
-  byte i = strlen(device);
+  byte i = strlen(_device);
   byte l = strlen(P_THERM_STATE);
   char* buffer = (char*)malloc( i+l+1+2 );
   if ( buffer == NULL) return;
-  strcpy(buffer, device);
+  strcpy(buffer, _device);
   strcat_P(buffer, (char*)P_THERM_STATE);
   sprintf_P(buffer, PSTR("%s%d"), buffer, index+1);
 
   char* s = (char*)malloc( 4 );
   strcpy_P(s, (info.state == ENABLE) ? CONST_ON : CONST_OFF);
    //WRITE_TO_SERIAL(F("dsw_temp_publish_by_topic: "), (char*)buffer, F("\ttemp: "), (char *)temp);
-  mqtt_client->publish( buffer, s);
+  _mqtt->publish( buffer, s);
 #ifdef DEBUG1  
   WRITE_TO_SERIAL(F("publish_state MQTT topic: "), buffer, F(" value: "), s);	
 #endif   
@@ -90,21 +98,21 @@ void Thermostat::publish_state(PubSubClient *mqtt_client, const char *device) {
  free(s);
 }
 
-void Thermostat::publish_status(PubSubClient *mqtt_client, const char *device) {
+void Thermostat::publish_status() {
 	//(const char* topic, int value) {
   if (index == 255) return;
-  byte i = strlen(device);
+  byte i = strlen(_device);
   byte l = strlen(P_THERM_STATUS);
   char* buffer = (char*)malloc( i+l+1+2 );
   if ( buffer == NULL) return;
-  strcpy(buffer, device);
+  strcpy(buffer, _device);
   strcat_P(buffer, (char*)P_THERM_STATUS);
   sprintf_P(buffer, PSTR("%s%d"), buffer, index+1);
 
   char* s = (char*)malloc( 4 );
   strcpy_P(s, (info.status == ON) ? CONST_ON : CONST_OFF);
    //WRITE_TO_SERIAL(F("dsw_temp_publish_by_topic: "), (char*)buffer, F("\ttemp: "), (char *)temp);
-  mqtt_client->publish( buffer, s);
+  _mqtt->publish( buffer, s);
 #ifdef DEBUG1  
   WRITE_TO_SERIAL(F("publish_status MQTT topic: "), buffer, F(" value: "), s);	
 #endif   
@@ -112,13 +120,13 @@ void Thermostat::publish_status(PubSubClient *mqtt_client, const char *device) {
  free(s);
 }
 
-void Thermostat::publish_set_temp(PubSubClient *mqtt_client, const char *device) {
+void Thermostat::publish_set_temp() {
   if (index == 255) return;
-  byte i = strlen(device);
+  byte i = strlen(_device);
   byte l = strlen(P_THERM_SET_TEMP_STATE);
   char* buffer = (char*)malloc( i+l+1+2 );
   if ( buffer == NULL) return;
-  strcpy(buffer, device);
+  strcpy(buffer, _device);
   strcat_P(buffer, (char*)P_THERM_SET_TEMP_STATE);
   sprintf_P(buffer, PSTR("%s%d"), buffer, index+1);
 
@@ -129,7 +137,7 @@ void Thermostat::publish_set_temp(PubSubClient *mqtt_client, const char *device)
   
   
    //WRITE_TO_SERIAL(F("dsw_temp_publish_by_topic: "), (char*)buffer, F("\ttemp: "), (char *)temp);
-  mqtt_client->publish( buffer, temp);
+  _mqtt->publish( buffer, temp);
 #ifdef DEBUG1
   WRITE_TO_SERIAL(F("publish_set_temp MQTT topic: "), buffer, F(" value: "), temp);	
 #endif   
@@ -137,20 +145,20 @@ void Thermostat::publish_set_temp(PubSubClient *mqtt_client, const char *device)
   free(temp);  
 }
 
-void Thermostat::publish_mode(PubSubClient *mqtt_client, const char *device){
+void Thermostat::publish_mode(){
   if (index == 255 ) return;
-  byte i = strlen(device);
+  byte i = strlen(_device);
   byte l = strlen(P_THERM_MODE_STATE);
   char* buffer = (char*)malloc( i+l+1+2 );
   if ( buffer == NULL) return;
-  strcpy(buffer, device);
+  strcpy(buffer, _device);
   strcat_P(buffer, (char*)P_THERM_MODE_STATE);
   sprintf_P(buffer, PSTR("%s%d"), buffer, index+1);
 
   char* s = (char*)malloc( 4 );
   strcpy_P(s, (info.mode == AUTO) ? CONST_ON : CONST_OFF);
    //WRITE_TO_SERIAL(F("dsw_temp_publish_by_topic: "), (char*)buffer, F("\ttemp: "), (char *)temp);
-  mqtt_client->publish( buffer, s);
+  _mqtt->publish( buffer, s);
   
 #ifdef DEBUG1  
   WRITE_TO_SERIAL(F("Thermostat::publish_mode MQTT topic: "), buffer, F(" value: "), s);	
@@ -174,9 +182,9 @@ void Thermostat::saveState(byte* payload) {
 	  save_eeprom();
 }
 
-void Thermostat::setState(State st, const char *device) {
+void Thermostat::setState(State st) {
 	  info.state = st;
-	  setStatus( ( info.state == DISABLE ) ? OFF : ON, device);
+	  setStatus( ( info.state == DISABLE ) ? OFF : ON);
 	  save_eeprom();
 }
 
@@ -187,20 +195,15 @@ void Thermostat::saveSetTemp(byte* payload) {
   save_eeprom();
 }
 
-void Thermostat::setStatus(byte* payload, const char *device) {
+void Thermostat::setStatus(byte* payload) {
 	  char* cstring = (char*)payload;
 	  info.status = ( strcmp_P( cstring, CONST_ON) == 0 ) ? ON : OFF;	
-	  setStatus(info.status, device);
+	  setStatus(info.status);
 }
 
-void Thermostat::setStatus(Status st, const char *device) {
+void Thermostat::setStatus(Status st) {
 		info.status = st;
-		if ( info.status == ON ) {
-			relay->turnON();
-		} else {
-			relay->turnOFF();
-		}	
-		relay->publish(mqtt, device);
+		( info.status == ON ) ? relay->turnON() : relay->turnOFF();
 }
 
 void Thermostat::setMode(Mode m) {

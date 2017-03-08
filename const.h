@@ -7,7 +7,7 @@
 #define RESET_EEPROM
 #define TEST
 
-#define MEGA1
+#define MEGA
 
 #define CONST_ON (const char *)F("ON")
 #define CONST_OFF (const char *)F("OFF")
@@ -64,11 +64,11 @@
 #ifdef DEBUG
   #define WRITE_TO_SERIAL(val1,val2, val3, val4) { Serial.print(val1); Serial.print(val2); Serial.print(val3); Serial.println(val4); }
   #define WRITE_TO_SERIAL_BYTE_ARR(val0, val1, val2) { Serial.print(val0); for (byte i=0;i<sizeof(val1);i++) {Serial.print(val1[i], val2); Serial.print(" ");} Serial.println();}
-  #define WRITE_TO_SERIAL_CHAR_ARR(val0, val1) { Serial.print(val0); for (byte i=0;i<sizeof(val1);i++) {Serial.write(val1[i]);} Serial.println();}
+  #define WRITE_TO_SERIAL_CHAR_ARR(val0, val1) { Serial.print(val0); for (byte i=0;i<sizeof(val1);i++) {Serial.write( val1[i]);} Serial.println();}
 #endif
 
 #ifdef MEGA
-	const char P_DEVICE_NAME[] PROGMEM         = "mega";
+	const char P_DEVICE_NAME[] PROGMEM         = "arduino";
 #else
 	const char P_DEVICE_NAME[] PROGMEM         = "uno";
 #endif

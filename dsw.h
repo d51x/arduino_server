@@ -14,6 +14,9 @@ struct DSW_Info {
 };
 
 class DSW_Temp {
+	private:
+		PubSubClient *_mqtt;
+		char *_device;
 	public:
 		int value; 
 		byte index;
@@ -22,8 +25,9 @@ class DSW_Temp {
 		
 		DSW_Temp();
 		//~DSW_Temp(){};
+		void setMqttClient(PubSubClient *client, const char *device);
 		
-		void publish(const PubSubClient &mqtt_client, const char *device);
+		void publish();
 		void load_eeprom();
 		void save_eeprom();
 
