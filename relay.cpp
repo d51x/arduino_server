@@ -68,18 +68,18 @@ void Relay::publish() {
   byte l = strlen(P_GPIO_OUT_STATE);
   char* buffer = (char*)malloc( i+l+1+2 );
   if ( buffer == NULL) return;
-  //WRITE_TO_SERIAL(F("-------- "), device, F(""), F(""));	
+  WRITE_TO_SERIAL(F("-------- "), _device, F(""), F(""));	
   strcpy(buffer, _device);
   strcat_P(buffer, (char*)P_GPIO_OUT_STATE);
   sprintf_P(buffer, PSTR("%s%d"), buffer, index+1);
 
   char* s = (char*)malloc( 4 );
   strcpy_P(s, (info.status == ON) ? CONST_ON : CONST_OFF);
-   //WRITE_TO_SERIAL(F("relay_publish: "), (char*)buffer, F(" val "), (char*)s);
+   WRITE_TO_SERIAL(F("relay_publish: "), (char*)buffer, F(" val "), (char*)s);
   _mqtt->publish( buffer, s);
   //mqtt_client->publish( buffer, status);
   
-#ifdef DEBUG1  
+#ifdef DEBUG  
   WRITE_TO_SERIAL(F("Relay::publish MQTT topic: "), buffer, F(" value: "), s);	
   Serial.println();
 #endif 

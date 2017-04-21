@@ -18,8 +18,8 @@
 	#define I2C_SCL_PIN	0
 #endif
 
-#define FIRST_START_TIMEOUT 1//*1000
-#define READ_TEMP_INTERVAL 10//*1000 //30sec
+#define FIRST_START_TIMEOUT 2//*1000
+#define READ_TEMP_INTERVAL 30//*1000 //30sec
 #define TERMOSTAT_DELTA 50 // i.e. 1 grad
 
 #ifdef MEGA

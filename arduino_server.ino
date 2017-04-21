@@ -11,7 +11,7 @@
 #include "thermostat.h"
 
 #ifdef MEGA
-//+++++#include "http.h"
+#include "http.h"
 #endif
 //#include <SD.h>
 
@@ -87,7 +87,7 @@ void load_options() {
 	if (( options.device_name[0] == 0 ) || (options.device_name[0] == 255)) strcpy_P(options.device_name, P_DEVICE_NAME); 
 	if ( (options.firstStartTimeout == 255) || (options.firstStartTimeout == 0) ) options.firstStartTimeout = FIRST_START_TIMEOUT;
 	if ( options.max_power == 16000 ) options.max_power = 0;
-	if ( (options.thermostat_refresh == 255) || (options.thermostat_refresh == 0) ) options.thermostat_refresh = 10;
+	if ( (options.thermostat_refresh == 255) || (options.thermostat_refresh == 0) ) options.thermostat_refresh = READ_TEMP_INTERVAL;
 	if ( (options.temperature_refresh == 255) || (options.temperature_refresh == 0) ) options.temperature_refresh = READ_TEMP_INTERVAL;
 	byte t0[6] = {0, 0, 0, 0, 0, 0};
 	byte t1[6] = {255, 255, 255, 255, 255, 255};
@@ -221,7 +221,7 @@ void init_relays() {
 	if (relay[i].begin())	delay(options.firstStartTimeout * 1000); 	
   }
 
-#ifdef DEBUG1
+#ifdef DEBUG
   for (byte i=0;i<options.relays_count;i++) {
 	WRITE_TO_SERIAL(F("Relay: "), relay[i].index+1, F(" pin "), relay[i].info.pin);  
 	WRITE_TO_SERIAL(F("status: "), relay[i].info.status, F(" state "), relay[i].info.state);  
@@ -251,7 +251,7 @@ void init_relays() {
 
 #endif
 
-#ifdef DEBUG1
+#ifdef DEBUG
   Serial.println("Setting up ... Relay test data end....");
   for (byte i=0;i<options.relays_count;i++) {
 	WRITE_TO_SERIAL(F("Relay: "), relay[i].index+1, F(" pin "), relay[i].info.pin);  
@@ -328,18 +328,20 @@ void init_thermostats() {
 
 void publish_all_data() {
 	//relay states
+	/*
   for (byte i=0;i<options.relays_count;i++) {
 	if (relay[i].info.state == ENABLE)
 		relay[i].publish();
-  }	
-  
+  }
+*/  
+ /* 
   for (byte i=0;i<options.therms_count;i++) {
 	thermostat[i].publish_state();
 	thermostat[i].publish_status();
 	if (thermostat[i].info.state == ENABLE)	thermostat[i].publish_set_temp();
 	thermostat[i].publish_mode();
   }		
-	
+*/	
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -450,7 +452,7 @@ void reconnect() {
 
 void setup() {
 	//for (int t=0;t<1024;t++) EEPROM.write(t, 255);
-#ifdef DEBUG1
+#ifdef DEBUG
 	Serial.begin(9600);
 	while (!Serial) {
 		//  ; // wait for serial port to connect. Needed for native USB port only
@@ -469,7 +471,7 @@ void setup() {
   
   load_options();
 
-#ifdef DEBUG1
+#ifdef DEBUG
 	WRITE_TO_SERIAL(F("--------- "), F(" loaded options "), F(" "), F(""));
 	WRITE_TO_SERIAL(F("OneWire Pin: "), options.pin_onewire, F(" "), F(""));
 	WRITE_TO_SERIAL(F("Device name: "), (char*)options.device_name, F(" "), F(""));
@@ -587,8 +589,7 @@ void free_memory_publish() {
 }
 
 
-void thermostat_sort_by_priority() {
-	return;
+void thermostat_sort_by_priority() {	return;
  #ifdef DEBUG1 
   WRITE_TO_SERIAL(F("thermostat_sort_by_priority...."), F(""), F(""), F(""));	
 #endif 
@@ -623,8 +624,7 @@ void thermostat_sort_by_priority() {
 
 
 
-void thermostat_sort_by_index() {
-	return;
+void thermostat_sort_by_index() {	return;
  #ifdef DEBUG1 
   WRITE_TO_SERIAL(F("thermostat_sort_by_index...."), F(""), F(""), F(""));	
 #endif 	
@@ -653,8 +653,7 @@ void thermostat_sort_by_index() {
 }
  
  
-void termostat_update() {
-	return;
+void termostat_update() {	return;
 #ifdef DEBUG1  
   WRITE_TO_SERIAL(F("-------- "), F("function termostat_update"), F(" start"), F(""));	
 #endif 	
@@ -930,7 +929,7 @@ void generatePage(EthernetClient client){
 }
 
 */
-/*
+
 void listenForEthernetClients() {
 	// listen for incoming clients
 	EthernetClient client = server.available();
@@ -952,43 +951,61 @@ void listenForEthernetClients() {
 				//WRITE_TO_SERIAL(F("Request: "), request, F(""), F(""));	
 				
 			  if(request=="/") {
-				//successHeader(client);
-				//generatePage(client);
+				generate_main_page(client);
 			  } else {
 				  
 				  
 				if ( request.startsWith("ajax_") ) {
 					// ajax request here
 					
+				} else if ( request.startsWith("main.css") ) {
+					// styles
+					
 				} else {
 					// other pages or http get requests
 					String dev = getNextSlug(&request);	
 					String func = getNextSlug(&request);
 					String idx = getNextSlug(&request);
+					String value = getNextSlug(&request);
+					
+					
+					Serial.print( "DEV: "); Serial.print(dev); 
+					Serial.print("\t func: "); Serial.print(func);
+					Serial.print("\t idx: "); Serial.print(idx);
+					Serial.print("\t value: "); Serial.print(value );
+					Serial.println();
 					
 					// разбор get запросов вида /dev/func/idx для страниц
-					if ( dev.equals( HTTP_SLUG_RELAY ) ) {
-						if ( func.equals( HTTP_SLUG_STATE ) ) {
+					if ( strcmp_P(dev.c_str(), HTTP_SLUG_RELAY ) == 0 ) {
+						
+						Serial.println( "http request: Realy found"); 
+						
+						if ( strcmp_P( func.c_str(), HTTP_SLUG_STATE ) == 0 ) {
 							//redirectHeader(client, "/");
-						} else if (func.equals( HTTP_SLUG_STATUS )) {
-							relay[idx.toInt()].switch_relay( request.equals( CONST_ON ) ? OFF : ON);
-							relay[idx.toInt()].publish( mqtt_client, options.device_name );
+							Serial.println( "http request: Realy state found"); 
+							
+						} else if (strcmp_P( func.c_str(), HTTP_SLUG_STATUS ) == 0) {
+							Serial.println( "http request: Realy status found"); 
+							relay[idx.toInt()].switch_relay( strcmp_P( value.c_str(), CONST_ON ) == 0 ? ON : OFF);
+							relay[idx.toInt()].publish();
 							//redirectHeader(client, "/");						
-						} else if (func.equals( HTTP_SLUG_SIGNAL )) {
+						} else if (strcmp_P( func.c_str(), HTTP_SLUG_SIGNAL ) == 0) {
+							Serial.println( "http request: Realy signal found"); 
 							//redirectHeader(client, "/");						
-						} else if (func.equals( HTTP_SLUG_FLASH )) {
+						} else if (strcmp_P( func.c_str(), HTTP_SLUG_FLASH ) == 0) {
+							Serial.println( "http request: Realy flash found"); 
 							//redirectHeader(client, "/");						
 						}
-					} else if ( dev.equals( HTTP_SLUG_THERM ) ) {
-						if ( func.equals( HTTP_SLUG_STATE ) ) {
-							thermostat[idx.toInt()].setState( request.equals( HTTP_SLUG_ON ) ? ENABLE : DISABLE, options.device_name);
+					} else if ( strcmp_P( dev.c_str(), HTTP_SLUG_THERM ) == 0 ) {
+						if ( strcmp_P( func.c_str(), HTTP_SLUG_STATE ) == 0 ) {
+							thermostat[idx.toInt()].setState( request.equals( HTTP_SLUG_ON ) ? ENABLE : DISABLE);
 							redirectHeader(client, "/");
-						} else if ( func.equals( HTTP_SLUG_MODE ) ) {
+						} else if ( strcmp_P( func.c_str(), HTTP_SLUG_MODE ) == 0 ) {
 							thermostat[idx.toInt()].setMode( request.equals( HTTP_SLUG_AUTO ) ? AUTO : MANUAL);
 							//redirectHeader(client, "/");
 						}					
-					} else if ( dev.equals( HTTP_SLUG_DSW ) ) {
-						if ( func.equals( HTTP_SLUG_STATE ) ) {
+					} else if ( strcmp_P( dev.c_str(), HTTP_SLUG_DSW ) == 0 ) {
+						if ( strcmp_P( func.c_str(), HTTP_SLUG_STATE ) == 0) {
 							dsw_temp[idx.toInt()].setState( request.equals( HTTP_SLUG_ENABLE ) ? ENABLE : DISABLE);
 							//redirectHeader(client, "/");
 						}					
@@ -1017,7 +1034,7 @@ void listenForEthernetClients() {
     client.stop();
     //Serial.println("client disconnected");		
 }
-*/
+
 
 void loop() {
   
@@ -1026,7 +1043,7 @@ void loop() {
   if ((millis() - lastReadingTime2) > (options.temperature_refresh * 1000)) {
     lastReadingTime2 = millis();
     temperature_update();
-	free_memory_publish();
+	//free_memory_publish();
 	//WRITE_TO_SERIAL(F("FreeMem: "), memoryFree(), F(""), F(""));	
   }
 
@@ -1048,6 +1065,10 @@ void loop() {
   mqtt_client.loop();
   
   // listen for incoming clients
- // listenForEthernetClients();  
+#ifdef MEGA
+  listenForEthernetClients();  
+#endif
+  
+
   
 }

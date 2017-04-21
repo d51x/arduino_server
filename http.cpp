@@ -26,7 +26,7 @@ String getNextSlug(String *request) {
 	if ( request[0] != '/' ) request->remove( 0, 1);
 	byte pos = request->indexOf('/');
 	res = request->substring(0, pos );
-	request->remove( 0, pos + 1);
+	request->remove( 0, pos );
 	return res;
 }
 
@@ -37,6 +37,7 @@ void send(EthernetClient client, const char *ptr)
 }
 
 void generate_main_page(EthernetClient client) {
+	send(client, header_http_ok);
 	send(client, page_header);
 	
 	// выц sensors
